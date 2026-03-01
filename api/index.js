@@ -6,17 +6,17 @@ const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
 const path = require("path");
+const crypto = require("crypto");
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
 // ── DB CONNECTION ─────────────────────────────────────────────────────────────
-// Vercel serverless: cache the connection promise so warm lambdas reuse it
 let connectionPromise = null;
 
 async function connectDB() {
-  if (mongoose.connection.readyState === 1) return; // already open
+  if (mongoose.connection.readyState === 1) return;
 
   const uri = process.env.MONGODB_URI;
   if (!uri) throw new Error("MONGODB_URI environment variable is not set");
@@ -32,19 +32,25 @@ async function connectDB() {
   await connectionPromise;
 }
 
+// simple hash — no bcrypt dependency needed
+function hashPassword(pw) {
+  return crypto.createHash("sha256").update(pw + "pf_salt_2025").digest("hex");
+}
+
 // ── SCHEMAS ───────────────────────────────────────────────────────────────────
 const userSchema = new mongoose.Schema(
   {
-    name:       { type: String, required: true, trim: true },
-    email:      { type: String, required: true, unique: true, lowercase: true, trim: true },
-    role:       { type: String, default: "" },
-    college:    { type: String, default: "" },
-    year:       { type: String, default: "" },
-    bio:        { type: String, default: "" },
-    skills:     { type: [String], default: [] },
-    interests:  { type: [String], default: [] },
-    avatar:     { type: String, default: "🧑‍💻" },
-    lookingFor: { type: String, default: "partners" },
+    name:         { type: String, required: true, trim: true },
+    email:        { type: String, required: true, unique: true, lowercase: true, trim: true },
+    passwordHash: { type: String, required: true },
+    role:         { type: String, default: "" },
+    college:      { type: String, default: "" },
+    year:         { type: String, default: "" },
+    bio:          { type: String, default: "" },
+    skills:       { type: [String], default: [] },
+    interests:    { type: [String], default: [] },
+    avatar:       { type: String, default: "🧑‍💻" },
+    lookingFor:   { type: String, default: "partners" },
   },
   { timestamps: true }
 );
@@ -52,7 +58,11 @@ const userSchema = new mongoose.Schema(
 userSchema.set("toJSON", {
   virtuals: true,
   versionKey: false,
-  transform: (_, ret) => { ret.id = ret._id.toString(); delete ret._id; },
+  transform: (_, ret) => {
+    ret.id = ret._id.toString();
+    delete ret._id;
+    delete ret.passwordHash; // never send hash to client
+  },
 });
 
 const projectSchema = new mongoose.Schema(
@@ -78,7 +88,6 @@ projectSchema.set("toJSON", {
   transform: (_, ret) => { ret.id = ret._id.toString(); delete ret._id; },
 });
 
-// Guard against model re-registration across hot reloads / Vercel warm starts
 const User    = mongoose.models.User    || mongoose.model("User",    userSchema);
 const Project = mongoose.models.Project || mongoose.model("Project", projectSchema);
 
@@ -93,7 +102,6 @@ app.use(async (req, res, next) => {
   }
 });
 
-// ── STATIC FILES (local dev only) ─────────────────────────────────────────────
 if (process.env.NODE_ENV !== "production") {
   app.use(express.static(path.join(__dirname, "../public")));
 }
@@ -101,17 +109,19 @@ if (process.env.NODE_ENV !== "production") {
 // ── AUTH ──────────────────────────────────────────────────────────────────────
 app.post("/api/auth/signup", async (req, res) => {
   try {
-    const { name, email } = req.body;
-    if (!name || !email)
-      return res.status(400).json({ error: "name and email required" });
+    const { name, email, password } = req.body;
+    if (!name || !email || !password)
+      return res.status(400).json({ error: "name, email and password required" });
+    if (password.length < 6)
+      return res.status(400).json({ error: "Password must be at least 6 characters" });
 
     const existing = await User.findOne({ email });
     if (existing)
-      return res.status(409).json({ error: "Email already registered", user: existing });
+      return res.status(409).json({ error: "Email already registered" });
 
     const AVATARS = ["🧑‍💻","👩‍💻","🧑‍🔬","👩‍🔬","🧑‍🎨","👨‍🎨","🧑‍🚀","👩‍🚀","🧑‍🏫","👩‍🏫"];
     const avatar = AVATARS[Math.floor(Math.random() * AVATARS.length)];
-    const user = await User.create({ name, email, avatar });
+    const user = await User.create({ name, email, passwordHash: hashPassword(password), avatar });
     res.status(201).json(user);
   } catch (err) {
     if (err.code === 11000)
@@ -122,11 +132,17 @@ app.post("/api/auth/signup", async (req, res) => {
 
 app.post("/api/auth/login", async (req, res) => {
   try {
-    const { email } = req.body;
-    if (!email) return res.status(400).json({ error: "email required" });
-    const user = await User.findOne({ email });
+    const { email, password } = req.body;
+    if (!email || !password)
+      return res.status(400).json({ error: "email and password required" });
+
+    const user = await User.findOne({ email }).select("+passwordHash");
     if (!user)
       return res.status(404).json({ error: "No account found with that email" });
+
+    if (user.passwordHash !== hashPassword(password))
+      return res.status(401).json({ error: "Incorrect password" });
+
     res.json(user);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -139,9 +155,7 @@ app.get("/api/users/:id", async (req, res) => {
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ error: "User not found" });
     res.json(user);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 app.patch("/api/users/:id", async (req, res) => {
@@ -154,9 +168,7 @@ app.patch("/api/users/:id", async (req, res) => {
     const user = await User.findByIdAndUpdate(req.params.id, updates, { new: true });
     if (!user) return res.status(404).json({ error: "User not found" });
     res.json(user);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 app.get("/api/users/:id/matches", async (req, res) => {
@@ -176,18 +188,12 @@ app.get("/api/users/:id/matches", async (req, res) => {
       const overlap = u.skills.filter(s => mySkillSet.has(s));
       score += Math.min(overlap.length * 5, 20);
       if (me.college && u.college && me.college === u.college) score += 10;
-      return {
-        ...u.toJSON(),
-        matchPercentage: Math.min(score, 99),
-        sharedInterests,
-      };
+      return { ...u.toJSON(), matchPercentage: Math.min(score, 99), sharedInterests };
     });
 
     scored.sort((a, b) => b.matchPercentage - a.matchPercentage);
     res.json(scored);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 // ── PROJECTS ──────────────────────────────────────────────────────────────────
@@ -196,17 +202,11 @@ app.get("/api/projects", async (req, res) => {
     const { tech, interest } = req.query;
     let projects = await Project.find().sort({ createdAt: -1 }).lean();
     if (tech && tech !== "All")
-      projects = projects.filter(p =>
-        p.stack.some(s => s.toLowerCase().includes(tech.toLowerCase()))
-      );
+      projects = projects.filter(p => p.stack.some(s => s.toLowerCase().includes(tech.toLowerCase())));
     if (interest && interest !== "All")
-      projects = projects.filter(p =>
-        p.interests.some(i => i.toLowerCase().includes(interest.toLowerCase()))
-      );
+      projects = projects.filter(p => p.interests.some(i => i.toLowerCase().includes(interest.toLowerCase())));
     res.json(projects);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 app.post("/api/projects", async (req, res) => {
@@ -221,21 +221,13 @@ app.post("/api/projects", async (req, res) => {
     }
 
     const project = await Project.create({
-      title,
-      description: description || "",
-      stack: stack || [],
-      interests: interests || [],
-      difficulty: difficulty || "Intermediate",
-      teamSize: teamSize || 4,
-      duration: duration || "4 weeks",
-      author: authorId || null,
-      authorName,
-      authorCollege,
+      title, description: description || "", stack: stack || [],
+      interests: interests || [], difficulty: difficulty || "Intermediate",
+      teamSize: teamSize || 4, duration: duration || "4 weeks",
+      author: authorId || null, authorName, authorCollege,
     });
     res.status(201).json(project);
-  } catch (err) {
-    res.status(400).json({ error: err.message });
-  }
+  } catch (err) { res.status(400).json({ error: err.message }); }
 });
 
 // ── ERROR HANDLER ─────────────────────────────────────────────────────────────
@@ -244,7 +236,7 @@ app.use((err, _req, res, _next) => {
   res.status(500).json({ error: "Internal server error" });
 });
 
-// ── LOCAL DEV SERVER ──────────────────────────────────────────────────────────
+// ── LOCAL DEV ─────────────────────────────────────────────────────────────────
 if (require.main === module) {
   const PORT = process.env.PORT || 3000;
   app.listen(PORT, () => console.log(`PartnerForge running on :${PORT}`));

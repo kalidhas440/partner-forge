@@ -50,7 +50,6 @@ label{display:block;font-size:12px;font-weight:700;letter-spacing:1px;text-trans
 .auth-form h2{font-size:26px;font-weight:700;margin-bottom:4px;}
 .auth-form p{color:var(--muted2);font-size:14px;margin-bottom:8px;}
 .form-group{display:flex;flex-direction:column;}
-.auth-divider{text-align:center;color:var(--muted);font-size:13px;margin:4px 0;}
 /* ONBOARD */
 #page-onboard{flex-direction:column;align-items:center;justify-content:flex-start;padding:60px 20px 40px;position:relative;overflow:hidden;}
 .onboard-bg{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 60% 50% at 50% 0%,rgba(108,71,255,.15) 0%,transparent 60%);}
@@ -237,20 +236,23 @@ label{display:block;font-size:12px;font-weight:700;letter-spacing:1px;text-trans
       <button class="auth-tab active" id="tab-signup" onclick="switchAuthTab('signup')">Create Account</button>
       <button class="auth-tab" id="tab-login" onclick="switchAuthTab('login')">Sign In</button>
     </div>
+    <!-- SIGNUP -->
     <div id="auth-signup">
       <div class="auth-form">
         <div><h2>Start building 🚀</h2><p>Join students finding their perfect project partners</p></div>
         <div class="form-group"><label>Your Name</label><input id="signup-name" type="text" placeholder="e.g. Priya Sharma" /></div>
         <div class="form-group"><label>Email Address</label><input id="signup-email" type="email" placeholder="you@university.edu" /></div>
+        <div class="form-group"><label>Password</label><input id="signup-password" type="password" placeholder="Min. 6 characters" /></div>
         <div id="signup-error" style="color:var(--pink);font-size:13px;display:none;"></div>
         <button class="btn btn-primary btn-full btn-lg" id="signup-btn" onclick="handleSignup()">Create Free Account →</button>
-        <div class="auth-divider">No password needed — we keep it simple</div>
       </div>
     </div>
+    <!-- LOGIN -->
     <div id="auth-login" style="display:none;">
       <div class="auth-form">
-        <div><h2>Welcome back 👋</h2><p>Sign in with your email to continue</p></div>
+        <div><h2>Welcome back 👋</h2><p>Sign in to continue</p></div>
         <div class="form-group"><label>Email Address</label><input id="login-email" type="email" placeholder="you@university.edu" /></div>
+        <div class="form-group"><label>Password</label><input id="login-password" type="password" placeholder="Your password" /></div>
         <div id="login-error" style="color:var(--pink);font-size:13px;display:none;"></div>
         <button class="btn btn-primary btn-full btn-lg" id="login-btn" onclick="handleLogin()">Sign In →</button>
       </div>
@@ -392,7 +394,7 @@ label{display:block;font-size:12px;font-weight:700;letter-spacing:1px;text-trans
       <div class="section-wrap">
         <div class="section-eyebrow">People</div>
         <div class="section-heading">Your Partner Matches</div>
-        <div class="section-sub">Students ranked by how well your skills and interests align. Add more to improve matches.</div>
+        <div class="section-sub">Students ranked by how well your skills and interests align.</div>
         <div class="matches-filter" id="matches-filter-bar">
           <button class="filter-btn active" onclick="filterMatches(this,'all')">All</button>
           <button class="filter-btn" onclick="filterMatches(this,'high')">⚡ High Match (70%+)</button>
@@ -559,35 +561,41 @@ function switchAuthTab(tab){
   document.getElementById('tab-signup').className='auth-tab'+(tab==='signup'?' active':'');
   document.getElementById('tab-login').className='auth-tab'+(tab==='login'?' active':'');
 }
+
 async function handleSignup(){
   const name=document.getElementById('signup-name').value.trim();
   const email=document.getElementById('signup-email').value.trim();
+  const password=document.getElementById('signup-password').value;
   const errEl=document.getElementById('signup-error');
   const btn=document.getElementById('signup-btn');
   errEl.style.display='none';
-  if(!name||!email){errEl.textContent='Please fill in all fields';errEl.style.display='block';return;}
+  if(!name||!email||!password){errEl.textContent='Please fill in all fields';errEl.style.display='block';return;}
+  if(password.length<6){errEl.textContent='Password must be at least 6 characters';errEl.style.display='block';return;}
   btn.disabled=true;btn.innerHTML='<span class="spinner"></span> Creating…';
   try{
-    const user=await api('/api/auth/signup',{method:'POST',body:{name,email}});
+    const user=await api('/api/auth/signup',{method:'POST',body:{name,email,password}});
     currentUser=user;saveLocal();startOnboarding();
   }catch(e){
     errEl.textContent=e.message.includes('already')?'Email already registered — try signing in instead':e.message;
     errEl.style.display='block';
   }finally{btn.disabled=false;btn.innerHTML='Create Free Account →';}
 }
+
 async function handleLogin(){
   const email=document.getElementById('login-email').value.trim();
+  const password=document.getElementById('login-password').value;
   const errEl=document.getElementById('login-error');
   const btn=document.getElementById('login-btn');
   errEl.style.display='none';
-  if(!email){errEl.textContent='Enter your email';errEl.style.display='block';return;}
+  if(!email||!password){errEl.textContent='Enter your email and password';errEl.style.display='block';return;}
   btn.disabled=true;btn.innerHTML='<span class="spinner"></span> Signing in…';
   try{
-    const user=await api('/api/auth/login',{method:'POST',body:{email}});
+    const user=await api('/api/auth/login',{method:'POST',body:{email,password}});
     currentUser=user;saveLocal();enterApp();
   }catch(e){errEl.textContent=e.message;errEl.style.display='block';}
   finally{btn.disabled=false;btn.innerHTML='Sign In →';}
 }
+
 function logout(){currentUser=null;localStorage.removeItem('pf_user');showPage('auth');}
 
 function startOnboarding(){
@@ -902,9 +910,11 @@ async function saveSkillsInterests(){
 (function init(){
   const saved=loadLocal();
   if(saved){currentUser=saved;enterApp();}
-  document.getElementById('signup-email').addEventListener('keydown',e=>{if(e.key==='Enter')handleSignup();});
   document.getElementById('signup-name').addEventListener('keydown',e=>{if(e.key==='Enter')handleSignup();});
+  document.getElementById('signup-email').addEventListener('keydown',e=>{if(e.key==='Enter')handleSignup();});
+  document.getElementById('signup-password').addEventListener('keydown',e=>{if(e.key==='Enter')handleSignup();});
   document.getElementById('login-email').addEventListener('keydown',e=>{if(e.key==='Enter')handleLogin();});
+  document.getElementById('login-password').addEventListener('keydown',e=>{if(e.key==='Enter')handleLogin();});
 })();
 </script>
 </body>
