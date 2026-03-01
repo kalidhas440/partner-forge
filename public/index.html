@@ -1434,268 +1434,25 @@
   <!-- Tech filter chips -->
   <div class="filter-bar">
     <span class="filter-label">Stack:</span>
-    <button class="filter-chip active" onclick="toggleFilter(this)">All</button>
-    <button class="filter-chip" onclick="toggleFilter(this)">React</button>
-    <button class="filter-chip" onclick="toggleFilter(this)">Python</button>
-    <button class="filter-chip" onclick="toggleFilter(this)">AI / LLM</button>
-    <button class="filter-chip" onclick="toggleFilter(this)">UI/UX</button>
-    <button class="filter-chip" onclick="toggleFilter(this)">Flutter</button>
-    <button class="filter-chip" onclick="toggleFilter(this)">Node.js</button>
-    <button class="filter-chip" onclick="toggleFilter(this)">Blockchain</button>
+    <button class="filter-chip active" onclick="filterProjects(this, 'All')">All</button>
+    <button class="filter-chip" onclick="filterProjects(this, 'React')">React</button>
+    <button class="filter-chip" onclick="filterProjects(this, 'Python')">Python</button>
+    <button class="filter-chip" onclick="filterProjects(this, 'AI / LLM')">AI / LLM</button>
+    <button class="filter-chip" onclick="filterProjects(this, 'UI/UX')">UI/UX</button>
+    <button class="filter-chip" onclick="filterProjects(this, 'Flutter')">Flutter</button>
+    <button class="filter-chip" onclick="filterProjects(this, 'Node.js')">Node.js</button>
+    <button class="filter-chip" onclick="filterProjects(this, 'Blockchain')">Blockchain</button>
   </div>
 
-  <div class="projects-grid stagger" id="projectsGrid">
+  <!-- Loading state shown while fetching from API -->
+  <div id="projectsLoading" style="text-align:center; color: var(--muted); padding: 60px 0; display:flex; align-items:center; justify-content:center; gap:10px;">
+    <span style="display:inline-block; width:18px; height:18px; border:2px solid var(--accent); border-top-color:transparent; border-radius:50%; animation: spin 0.7s linear infinite;"></span>
+    Loading projects…
+  </div>
+  <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
 
-    <!-- Card 1 -->
-    <div class="project-card">
-      <div class="project-header">
-        <span class="project-badge badge-ai">AI / ML</span>
-        <button class="project-bookmark" onclick="this.textContent = this.textContent === '🔖' ? '🏷️' : '🔖'">🔖</button>
-      </div>
-      <div class="project-body">
-        <h3 class="project-title">StudyBuddy — AI Tutor for Any Subject</h3>
-        <p class="project-desc">An LLM-powered study companion that adapts to your learning style and generates personalized quizzes from your notes.</p>
-        <div class="stack-chips">
-          <span class="stack-chip">Python</span>
-          <span class="stack-chip">LangChain</span>
-          <span class="stack-chip">React</span>
-          <span class="stack-chip">FastAPI</span>
-        </div>
-        <div class="project-meta">
-          <span class="meta-item">
-            <span>⚡</span>
-            Difficulty:
-            <span class="difficulty">
-              <span class="diff-dot" style="background:#7c5cfc"></span>
-              <span class="diff-dot" style="background:#7c5cfc"></span>
-              <span class="diff-dot" style="background:var(--border)"></span>
-            </span>
-          </span>
-          <span class="meta-item">👥 2 / 4 members</span>
-          <span class="meta-item">⏱ 2 weeks</span>
-        </div>
-      </div>
-      <div class="project-footer">
-        <div class="project-author">
-          <div class="author-avatar" style="background: linear-gradient(135deg, #7c5cfc, #fc5c7d);">👩</div>
-          <div class="author-info">
-            <div class="author-name">Priya S.</div>
-            <div class="author-college">IIT Bombay</div>
-          </div>
-        </div>
-        <div class="project-actions">
-          <button class="btn-join" onclick="joinProject(this)">Join →</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Card 2 -->
-    <div class="project-card">
-      <div class="project-header">
-        <span class="project-badge badge-web">Web Dev</span>
-        <button class="project-bookmark">🔖</button>
-      </div>
-      <div class="project-body">
-        <h3 class="project-title">Campus Eats — Student Food Delivery App</h3>
-        <p class="project-desc">A hyperlocal food ordering platform connecting campus canteens with students, featuring real-time order tracking and group orders.</p>
-        <div class="stack-chips">
-          <span class="stack-chip">Next.js</span>
-          <span class="stack-chip">Tailwind</span>
-          <span class="stack-chip">Supabase</span>
-          <span class="stack-chip">Stripe</span>
-        </div>
-        <div class="project-meta">
-          <span class="meta-item">
-            Difficulty:
-            <span class="difficulty">
-              <span class="diff-dot" style="background:#5cf4c4"></span>
-              <span class="diff-dot" style="background:var(--border)"></span>
-              <span class="diff-dot" style="background:var(--border)"></span>
-            </span>
-          </span>
-          <span class="meta-item">👥 1 / 3 members</span>
-          <span class="meta-item">⏱ 6 weeks</span>
-        </div>
-      </div>
-      <div class="project-footer">
-        <div class="project-author">
-          <div class="author-avatar" style="background: linear-gradient(135deg, #5cf4c4, #3b82f6);">🧑</div>
-          <div class="author-info">
-            <div class="author-name">Arjun M.</div>
-            <div class="author-college">UCLA</div>
-          </div>
-        </div>
-        <div class="project-actions">
-          <button class="btn-join" onclick="joinProject(this)">Join →</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Card 3 -->
-    <div class="project-card">
-      <div class="project-header">
-        <span class="project-badge badge-app">App Dev</span>
-        <button class="project-bookmark">🔖</button>
-      </div>
-      <div class="project-body">
-        <h3 class="project-title">MindSpace — Mental Health Journaling App</h3>
-        <p class="project-desc">A private, AI-journaling app with mood tracking and therapist-reviewed prompts designed for stressed university students.</p>
-        <div class="stack-chips">
-          <span class="stack-chip">Flutter</span>
-          <span class="stack-chip">Firebase</span>
-          <span class="stack-chip">OpenAI API</span>
-        </div>
-        <div class="project-meta">
-          <span class="meta-item">
-            Difficulty:
-            <span class="difficulty">
-              <span class="diff-dot" style="background:#fc5c7d"></span>
-              <span class="diff-dot" style="background:#fc5c7d"></span>
-              <span class="diff-dot" style="background:#fc5c7d"></span>
-            </span>
-          </span>
-          <span class="meta-item">👥 3 / 5 members</span>
-          <span class="meta-item">⏱ 3 months</span>
-        </div>
-      </div>
-      <div class="project-footer">
-        <div class="project-author">
-          <div class="author-avatar" style="background: linear-gradient(135deg, #fc5c7d, #ffd066);">👩</div>
-          <div class="author-info">
-            <div class="author-name">Lena K.</div>
-            <div class="author-college">TU Berlin</div>
-          </div>
-        </div>
-        <div class="project-actions">
-          <button class="btn-join" onclick="joinProject(this)">Join →</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Card 4 -->
-    <div class="project-card">
-      <div class="project-header">
-        <span class="project-badge badge-open">Open Source</span>
-        <button class="project-bookmark">🔖</button>
-      </div>
-      <div class="project-body">
-        <h3 class="project-title">CodeReview.ai — Automated PR Reviewer</h3>
-        <p class="project-desc">An open-source GitHub bot that uses LLMs to give detailed, contextual code reviews on pull requests — better than lint rules alone.</p>
-        <div class="stack-chips">
-          <span class="stack-chip">TypeScript</span>
-          <span class="stack-chip">GitHub API</span>
-          <span class="stack-chip">Claude API</span>
-        </div>
-        <div class="project-meta">
-          <span class="meta-item">
-            Difficulty:
-            <span class="difficulty">
-              <span class="diff-dot" style="background:#7c5cfc"></span>
-              <span class="diff-dot" style="background:#7c5cfc"></span>
-              <span class="diff-dot" style="background:var(--border)"></span>
-            </span>
-          </span>
-          <span class="meta-item">👥 2 / 4 members</span>
-          <span class="meta-item">⏱ Ongoing</span>
-        </div>
-      </div>
-      <div class="project-footer">
-        <div class="project-author">
-          <div class="author-avatar" style="background: linear-gradient(135deg, #ffd066, #fc5c7d);">🧑</div>
-          <div class="author-info">
-            <div class="author-name">Marcus T.</div>
-            <div class="author-college">MIT</div>
-          </div>
-        </div>
-        <div class="project-actions">
-          <button class="btn-join" onclick="joinProject(this)">Join →</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Card 5 -->
-    <div class="project-card">
-      <div class="project-header">
-        <span class="project-badge badge-ai">AI / ML</span>
-        <button class="project-bookmark">🔖</button>
-      </div>
-      <div class="project-body">
-        <h3 class="project-title">SketchAI — Hand-drawn UI to Code</h3>
-        <p class="project-desc">Upload a whiteboard sketch of a UI and get production-ready React components back. Vision model + template system.</p>
-        <div class="stack-chips">
-          <span class="stack-chip">Python</span>
-          <span class="stack-chip">GPT-4V</span>
-          <span class="stack-chip">React</span>
-          <span class="stack-chip">FastAPI</span>
-        </div>
-        <div class="project-meta">
-          <span class="meta-item">
-            Difficulty:
-            <span class="difficulty">
-              <span class="diff-dot" style="background:#fc5c7d"></span>
-              <span class="diff-dot" style="background:#fc5c7d"></span>
-              <span class="diff-dot" style="background:#fc5c7d"></span>
-            </span>
-          </span>
-          <span class="meta-item">👥 1 / 3 members</span>
-          <span class="meta-item">⏱ 4 weeks</span>
-        </div>
-      </div>
-      <div class="project-footer">
-        <div class="project-author">
-          <div class="author-avatar" style="background: linear-gradient(135deg, #3b82f6, #5cf4c4);">👩</div>
-          <div class="author-info">
-            <div class="author-name">Yuna C.</div>
-            <div class="author-college">KAIST</div>
-          </div>
-        </div>
-        <div class="project-actions">
-          <button class="btn-join" onclick="joinProject(this)">Join →</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Card 6 -->
-    <div class="project-card">
-      <div class="project-header">
-        <span class="project-badge badge-web">Web Dev</span>
-        <button class="project-bookmark">🔖</button>
-      </div>
-      <div class="project-body">
-        <h3 class="project-title">DevCollab — Real-time Code Editor</h3>
-        <p class="project-desc">A collaborative browser-based code editor with video chat, inspired by Replit. Built for student pair programming sessions.</p>
-        <div class="stack-chips">
-          <span class="stack-chip">WebSockets</span>
-          <span class="stack-chip">Monaco</span>
-          <span class="stack-chip">WebRTC</span>
-          <span class="stack-chip">Redis</span>
-        </div>
-        <div class="project-meta">
-          <span class="meta-item">
-            Difficulty:
-            <span class="difficulty">
-              <span class="diff-dot" style="background:#7c5cfc"></span>
-              <span class="diff-dot" style="background:#7c5cfc"></span>
-              <span class="diff-dot" style="background:#7c5cfc"></span>
-            </span>
-          </span>
-          <span class="meta-item">👥 2 / 4 members</span>
-          <span class="meta-item">⏱ 8 weeks</span>
-        </div>
-      </div>
-      <div class="project-footer">
-        <div class="project-author">
-          <div class="author-avatar" style="background: linear-gradient(135deg, #7c5cfc, #3b82f6);">🧑</div>
-          <div class="author-info">
-            <div class="author-name">Rohan P.</div>
-            <div class="author-college">NUS</div>
-          </div>
-        </div>
-        <div class="project-actions">
-          <button class="btn-join" onclick="joinProject(this)">Join →</button>
-        </div>
-      </div>
-    </div>
+  <div class="projects-grid stagger" id="projectsGrid" style="display:none">
+  </div>
   </div>
 </section>
 
@@ -1903,7 +1660,40 @@
   </div>
 </footer>
 
+<!-- POST PROJECT MODAL -->
+<div id="postModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:1000; align-items:center; justify-content:center; backdrop-filter:blur(8px);">
+  <div style="background:var(--surface); border:1px solid var(--border); border-radius:24px; padding:40px; width:100%; max-width:540px; margin:20px; position:relative;">
+    <button onclick="closePostModal()" style="position:absolute; top:16px; right:16px; background:none; border:1px solid var(--border); border-radius:8px; width:32px; height:32px; color:var(--muted); cursor:pointer; font-size:16px;">✕</button>
+    <h3 style="font-family:'Syne',sans-serif; font-size:22px; font-weight:700; margin-bottom:8px;">Post a Project</h3>
+    <p style="font-size:13px; color:var(--muted); margin-bottom:28px;">Share your idea and find collaborators</p>
+    <div style="display:flex; flex-direction:column; gap:16px;">
+      <div>
+        <label style="font-size:12px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:1px; display:block; margin-bottom:6px;">Project Title *</label>
+        <input id="postTitle" placeholder="e.g. StudyBuddy — AI Tutor App" style="width:100%; padding:10px 14px; border-radius:10px; border:1px solid var(--border); background:var(--card); color:var(--text); font-family:'DM Sans',sans-serif; font-size:14px; outline:none;" />
+      </div>
+      <div>
+        <label style="font-size:12px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:1px; display:block; margin-bottom:6px;">Description</label>
+        <textarea id="postDesc" rows="3" placeholder="What are you building and what kind of teammates do you need?" style="width:100%; padding:10px 14px; border-radius:10px; border:1px solid var(--border); background:var(--card); color:var(--text); font-family:'DM Sans',sans-serif; font-size:14px; outline:none; resize:vertical;"></textarea>
+      </div>
+      <div>
+        <label style="font-size:12px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:1px; display:block; margin-bottom:6px;">Tech Stack <span style="font-weight:400; color:var(--muted);">(comma-separated)</span></label>
+        <input id="postStack" placeholder="React, Node.js, MongoDB" style="width:100%; padding:10px 14px; border-radius:10px; border:1px solid var(--border); background:var(--card); color:var(--text); font-family:'DM Sans',sans-serif; font-size:14px; outline:none;" />
+      </div>
+      <div id="postError" style="color:#ff6b6b; font-size:13px; display:none;"></div>
+      <button onclick="submitProject()" id="postSubmitBtn" class="btn-primary" style="width:100%; padding:12px; border-radius:10px; font-size:15px;">
+        🚀 Post Project
+      </button>
+    </div>
+  </div>
+</div>
+
 <script>
+  // ── CONFIG ──
+  // Set this to your deployed Vercel API URL in production, or leave as '' for same-origin
+  const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    ? 'http://localhost:3000'
+    : '';  // same-origin on Vercel (vercel.json routes everything to api/index.js)
+
   // ── SCROLL ANIMATIONS ──
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
@@ -1916,9 +1706,10 @@
   document.querySelectorAll('.fade-in, .stagger').forEach(el => observer.observe(el));
 
   // ── FILTER CHIPS ──
-  function toggleFilter(el) {
+  function filterProjects(el, tech) {
     document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
     el.classList.add('active');
+    loadProjects(tech);
   }
 
   // ── INTEREST PILLS ──
@@ -1936,7 +1727,6 @@
     const desc = document.getElementById('collabDesc');
     const lookingBtn = document.getElementById('toggleLooking');
     const readyBtn = document.getElementById('toggleReady');
-
     if (mode === 'looking') {
       lookingBtn.classList.add('active');
       readyBtn.classList.remove('active');
@@ -1944,7 +1734,6 @@
       readyBtn.classList.add('active');
       lookingBtn.classList.remove('active');
     }
-
     desc.style.opacity = '0';
     setTimeout(() => {
       desc.textContent = modeDescriptions[mode];
@@ -1973,11 +1762,7 @@
   // ── NAV ACTIVE ──
   window.addEventListener('scroll', () => {
     const nav = document.querySelector('nav');
-    if (window.scrollY > 50) {
-      nav.style.background = 'rgba(10,10,15,0.95)';
-    } else {
-      nav.style.background = 'rgba(10,10,15,0.8)';
-    }
+    nav.style.background = window.scrollY > 50 ? 'rgba(10,10,15,0.95)' : 'rgba(10,10,15,0.8)';
   });
 
   // ── ANIMATE PROGRESS BARS ON SCROLL ──
@@ -1999,6 +1784,166 @@
   }, { threshold: 0.3 });
 
   document.querySelectorAll('.readiness-card').forEach(card => progressObserver.observe(card));
+
+  // ── API: LOAD PROJECTS ──
+  async function loadProjects(tech = 'All') {
+    const grid = document.getElementById('projectsGrid');
+    const loading = document.getElementById('projectsLoading');
+    grid.style.display = 'none';
+    loading.style.display = 'flex';
+
+    try {
+      const url = tech === 'All'
+        ? `${API_BASE}/api/projects`
+        : `${API_BASE}/api/projects?tech=${encodeURIComponent(tech)}`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const projects = await res.json();
+
+      if (!projects.length) {
+        grid.innerHTML = `<div style="color:var(--muted); font-size:15px; padding:40px 0; grid-column:1/-1; text-align:center;">No projects found for this filter.</div>`;
+      } else {
+        grid.innerHTML = projects.map(renderProjectCard).join('');
+      }
+      loading.style.display = 'none';
+      grid.style.display = 'grid';
+    } catch (err) {
+      loading.innerHTML = `<span style="color:#ff6b6b;">⚠ Could not load projects. Is the API running?<br><small>${err.message}</small></span>`;
+    }
+  }
+
+  const BADGE_TYPES = {
+    ai: 'badge-ai', ml: 'badge-ai', llm: 'badge-ai',
+    web: 'badge-web', react: 'badge-web', next: 'badge-web',
+    flutter: 'badge-app', swift: 'badge-app', app: 'badge-app',
+    open: 'badge-open', blockchain: 'badge-open',
+  };
+
+  function getBadgeClass(stack = []) {
+    for (const s of stack) {
+      const key = s.toLowerCase();
+      for (const [kw, cls] of Object.entries(BADGE_TYPES)) {
+        if (key.includes(kw)) return cls;
+      }
+    }
+    return 'badge-web';
+  }
+
+  function getBadgeLabel(stack = []) {
+    const lower = stack.map(s => s.toLowerCase());
+    if (lower.some(s => s.includes('ai') || s.includes('llm') || s.includes('ml'))) return 'AI / ML';
+    if (lower.some(s => s.includes('flutter') || s.includes('swift'))) return 'App Dev';
+    if (lower.some(s => s.includes('blockchain'))) return 'Open Source';
+    return 'Web Dev';
+  }
+
+  function renderProjectCard(p) {
+    const stackChips = (p.stack || []).map(s => `<span class="stack-chip">${s}</span>`).join('');
+    const dots = (p.diffDots || ['#7c5cfc','var(--border)','var(--border)'])
+      .map(color => `<span class="diff-dot" style="background:${color}"></span>`).join('');
+    const badgeClass = getBadgeClass(p.stack);
+    const badgeLabel = getBadgeLabel(p.stack);
+    return `
+      <div class="project-card">
+        <div class="project-header">
+          <span class="project-badge ${badgeClass}">${badgeLabel}</span>
+          <button class="project-bookmark" onclick="this.textContent = this.textContent === '🔖' ? '🏷️' : '🔖'">🔖</button>
+        </div>
+        <div class="project-body">
+          <h3 class="project-title">${p.title}</h3>
+          <p class="project-desc">${p.description || ''}</p>
+          <div class="stack-chips">${stackChips}</div>
+          <div class="project-meta">
+            <span class="meta-item">⚡ Difficulty: <span class="difficulty">${dots}</span></span>
+          </div>
+        </div>
+        <div class="project-footer">
+          <div class="project-author">
+            <div class="author-avatar" style="background: linear-gradient(135deg, var(--accent), var(--accent2));">🧑</div>
+          </div>
+          <div class="project-actions">
+            <button class="btn-join" onclick="joinProject(this)">Join →</button>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  // ── POST PROJECT MODAL ──
+  function openPostModal() {
+    const modal = document.getElementById('postModal');
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closePostModal() {
+    const modal = document.getElementById('postModal');
+    modal.style.display = 'none';
+    document.body.style.overflow = '';
+    document.getElementById('postTitle').value = '';
+    document.getElementById('postDesc').value = '';
+    document.getElementById('postStack').value = '';
+    document.getElementById('postError').style.display = 'none';
+  }
+
+  document.getElementById('postModal').addEventListener('click', function(e) {
+    if (e.target === this) closePostModal();
+  });
+
+  async function submitProject() {
+    const title = document.getElementById('postTitle').value.trim();
+    const description = document.getElementById('postDesc').value.trim();
+    const stackRaw = document.getElementById('postStack').value.trim();
+    const errorEl = document.getElementById('postError');
+    const btn = document.getElementById('postSubmitBtn');
+
+    if (!title) {
+      errorEl.textContent = 'Project title is required.';
+      errorEl.style.display = 'block';
+      return;
+    }
+    errorEl.style.display = 'none';
+
+    const stack = stackRaw ? stackRaw.split(',').map(s => s.trim()).filter(Boolean) : [];
+
+    btn.textContent = 'Posting…';
+    btn.disabled = true;
+
+    try {
+      const res = await fetch(`${API_BASE}/api/projects`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, description, stack })
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || `HTTP ${res.status}`);
+      }
+      closePostModal();
+      loadProjects('All');
+      // Reset filter to All
+      document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+      document.querySelector('.filter-chip').classList.add('active');
+    } catch (err) {
+      errorEl.textContent = `Failed to post: ${err.message}`;
+      errorEl.style.display = 'block';
+    } finally {
+      btn.textContent = '🚀 Post Project';
+      btn.disabled = false;
+    }
+  }
+
+  // ── WIRE "Post Your Project" BUTTONS ──
+  document.querySelectorAll('a[href="#"]').forEach(a => {
+    if (a.textContent.trim().toLowerCase().includes('post your project')) {
+      a.removeAttribute('href');
+      a.style.cursor = 'pointer';
+      a.addEventListener('click', openPostModal);
+    }
+  });
+
+  // ── INITIAL LOAD ──
+  loadProjects();
+
 </script>
 </body>
 </html>
