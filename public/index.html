@@ -3,1947 +3,909 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Project Partner Finder — For Students</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<title>PartnerForge — Find Your Build Squad</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Cabinet+Grotesk:wght@300;400;500;700;800&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #0a0a0f;
-    --surface: #12121a;
-    --surface2: #1a1a26;
-    --border: #2a2a3d;
-    --accent: #7c5cfc;
-    --accent2: #fc5c7d;
-    --accent3: #5cf4c4;
-    --text: #f0f0f8;
-    --muted: #7a7a9a;
-    --card: #161622;
-  }
-
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  html { scroll-behavior: smooth; }
-
-  body {
-    font-family: 'DM Sans', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    overflow-x: hidden;
-    cursor: default;
-  }
-
-  h1, h2, h3, h4, .logo-text { font-family: 'Syne', sans-serif; }
-
-  /* ── NOISE TEXTURE ── */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
-    pointer-events: none;
-    z-index: 999;
-    opacity: 0.5;
-  }
-
-  /* ── NAV ── */
-  nav {
-    position: fixed;
-    top: 0; left: 0; right: 0;
-    z-index: 100;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 18px 48px;
-    background: rgba(10,10,15,0.8);
-    backdrop-filter: blur(20px);
-    border-bottom: 1px solid var(--border);
-    animation: slideDown 0.6s ease both;
-  }
-
-  @keyframes slideDown {
-    from { transform: translateY(-100%); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-  }
-
-  .logo {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    text-decoration: none;
-  }
-
-  .logo-icon {
-    width: 36px; height: 36px;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 18px;
-  }
-
-  .logo-text {
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--text);
-  }
-
-  .logo-text span { color: var(--accent); }
-
-  nav ul {
-    display: flex;
-    list-style: none;
-    gap: 36px;
-    align-items: center;
-  }
-
-  nav ul a {
-    text-decoration: none;
-    color: var(--muted);
-    font-size: 14px;
-    font-weight: 500;
-    transition: color 0.2s;
-  }
-
-  nav ul a:hover { color: var(--text); }
-
-  .nav-actions {
-    display: flex;
-    gap: 12px;
-    align-items: center;
-  }
-
-  .btn-ghost {
-    padding: 9px 20px;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    background: transparent;
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s;
-    text-decoration: none;
-  }
-
-  .btn-ghost:hover {
-    border-color: var(--accent);
-    color: var(--accent);
-  }
-
-  .btn-primary {
-    padding: 9px 20px;
-    border: none;
-    border-radius: 8px;
-    background: linear-gradient(135deg, var(--accent), #9b6dff);
-    color: #fff;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-    text-decoration: none;
-    display: inline-block;
-  }
-
-  .btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(124,92,252,0.4);
-  }
-
-  /* ── HERO ── */
-  .hero {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    position: relative;
-    padding: 120px 48px 80px;
-    overflow: hidden;
-  }
-
-  .hero-bg {
-    position: absolute;
-    inset: 0;
-    background:
-      radial-gradient(ellipse 80% 60% at 60% 40%, rgba(124,92,252,0.15) 0%, transparent 60%),
-      radial-gradient(ellipse 40% 40% at 10% 80%, rgba(252,92,125,0.1) 0%, transparent 50%),
-      radial-gradient(ellipse 50% 50% at 90% 10%, rgba(92,244,196,0.08) 0%, transparent 50%);
-  }
-
-  /* Floating orbs */
-  .orb {
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(60px);
-    animation: float 8s ease-in-out infinite;
-    pointer-events: none;
-  }
-
-  .orb1 {
-    width: 400px; height: 400px;
-    background: rgba(124,92,252,0.2);
-    top: 10%; right: 10%;
-    animation-delay: 0s;
-  }
-
-  .orb2 {
-    width: 250px; height: 250px;
-    background: rgba(252,92,125,0.15);
-    bottom: 20%; left: 5%;
-    animation-delay: -3s;
-  }
-
-  .orb3 {
-    width: 180px; height: 180px;
-    background: rgba(92,244,196,0.12);
-    top: 60%; right: 30%;
-    animation-delay: -5s;
-  }
-
-  @keyframes float {
-    0%, 100% { transform: translateY(0) scale(1); }
-    50% { transform: translateY(-30px) scale(1.05); }
-  }
-
-  .hero-content {
-    position: relative;
-    z-index: 1;
-    max-width: 700px;
-    animation: fadeUp 0.8s ease 0.3s both;
-  }
-
-  @keyframes fadeUp {
-    from { transform: translateY(40px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-  }
-
-  .hero-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 14px;
-    background: rgba(124,92,252,0.15);
-    border: 1px solid rgba(124,92,252,0.3);
-    border-radius: 100px;
-    font-size: 13px;
-    color: #b19dff;
-    margin-bottom: 28px;
-  }
-
-  .hero-badge .dot {
-    width: 6px; height: 6px;
-    background: var(--accent3);
-    border-radius: 50%;
-    animation: pulse 2s infinite;
-  }
-
-  @keyframes pulse {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.5; transform: scale(0.8); }
-  }
-
-  .hero h1 {
-    font-size: clamp(42px, 6vw, 80px);
-    font-weight: 800;
-    line-height: 1.05;
-    letter-spacing: -2px;
-    margin-bottom: 24px;
-  }
-
-  .hero h1 .gradient-text {
-    background: linear-gradient(135deg, var(--accent), var(--accent2), var(--accent3));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  .hero p {
-    font-size: 18px;
-    color: var(--muted);
-    line-height: 1.7;
-    max-width: 520px;
-    margin-bottom: 40px;
-  }
-
-  .hero-btns {
-    display: flex;
-    gap: 16px;
-    align-items: center;
-    flex-wrap: wrap;
-  }
-
-  .btn-lg {
-    padding: 14px 32px;
-    font-size: 15px;
-    border-radius: 12px;
-  }
-
-  .btn-outline-lg {
-    padding: 13px 32px;
-    font-size: 15px;
-    border-radius: 12px;
-    border: 1px solid var(--border);
-    background: transparent;
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .btn-outline-lg:hover {
-    border-color: var(--accent3);
-    color: var(--accent3);
-  }
-
-  .hero-stats {
-    display: flex;
-    gap: 40px;
-    margin-top: 60px;
-    padding-top: 40px;
-    border-top: 1px solid var(--border);
-    animation: fadeUp 0.8s ease 0.6s both;
-  }
-
-  .stat-item { }
-
-  .stat-num {
-    font-family: 'Syne', sans-serif;
-    font-size: 28px;
-    font-weight: 800;
-    background: linear-gradient(135deg, var(--accent), var(--accent3));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  .stat-label {
-    font-size: 13px;
-    color: var(--muted);
-    margin-top: 2px;
-  }
-
-  /* Floating hero cards */
-  .hero-cards {
-    position: absolute;
-    right: 48px;
-    top: 50%;
-    transform: translateY(-50%);
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    animation: fadeUp 0.8s ease 0.5s both;
-  }
-
-  .hero-mini-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 16px 20px;
-    width: 280px;
-    backdrop-filter: blur(10px);
-    transition: transform 0.3s;
-  }
-
-  .hero-mini-card:hover { transform: translateX(-6px); }
-
-  .hero-mini-card:nth-child(2) { margin-left: 30px; }
-
-  .mc-top {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 10px;
-  }
-
-  .mc-avatar {
-    width: 36px; height: 36px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 16px;
-    flex-shrink: 0;
-  }
-
-  .mc-name { font-weight: 600; font-size: 14px; }
-  .mc-role { font-size: 12px; color: var(--muted); }
-
-  .mc-match {
-    display: inline-block;
-    padding: 3px 10px;
-    border-radius: 100px;
-    font-size: 11px;
-    font-weight: 600;
-    background: rgba(92,244,196,0.15);
-    color: var(--accent3);
-    border: 1px solid rgba(92,244,196,0.2);
-    margin-left: auto;
-  }
-
-  .mc-skills {
-    display: flex;
-    gap: 6px;
-    flex-wrap: wrap;
-  }
-
-  .skill-chip {
-    padding: 3px 10px;
-    border-radius: 100px;
-    font-size: 11px;
-    background: var(--surface2);
-    color: var(--muted);
-    border: 1px solid var(--border);
-  }
-
-  /* ── SECTION COMMONS ── */
-  section { padding: 100px 48px; }
-
-  .section-label {
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--accent);
-    margin-bottom: 16px;
-  }
-
-  .section-title {
-    font-size: clamp(32px, 4vw, 52px);
-    font-weight: 800;
-    letter-spacing: -1.5px;
-    line-height: 1.1;
-    margin-bottom: 16px;
-  }
-
-  .section-sub {
-    font-size: 16px;
-    color: var(--muted);
-    max-width: 500px;
-    line-height: 1.7;
-    margin-bottom: 60px;
-  }
-
-  /* ── HOW IT WORKS ── */
-  .how-section { background: var(--surface); }
-
-  .steps {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 2px;
-    background: var(--border);
-    border-radius: 24px;
-    overflow: hidden;
-  }
-
-  .step {
-    background: var(--card);
-    padding: 48px 40px;
-    position: relative;
-    transition: background 0.3s;
-  }
-
-  .step:hover { background: var(--surface2); }
-
-  .step-num {
-    font-family: 'Syne', sans-serif;
-    font-size: 72px;
-    font-weight: 800;
-    color: var(--border);
-    position: absolute;
-    top: 24px; right: 32px;
-    line-height: 1;
-  }
-
-  .step-icon {
-    width: 56px; height: 56px;
-    border-radius: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 26px;
-    margin-bottom: 24px;
-  }
-
-  .step h3 {
-    font-size: 22px;
-    font-weight: 700;
-    margin-bottom: 12px;
-    letter-spacing: -0.5px;
-  }
-
-  .step p {
-    font-size: 15px;
-    color: var(--muted);
-    line-height: 1.7;
-  }
-
-  /* ── FEATURES ── */
-  .features-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
-  }
-
-  .feature-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 36px;
-    transition: all 0.3s;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .feature-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, var(--accent), var(--accent2));
-    transform: scaleX(0);
-    transform-origin: left;
-    transition: transform 0.3s;
-  }
-
-  .feature-card:hover::before { transform: scaleX(1); }
-
-  .feature-card:hover {
-    border-color: rgba(124,92,252,0.3);
-    transform: translateY(-4px);
-    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-  }
-
-  .feature-icon {
-    font-size: 32px;
-    margin-bottom: 20px;
-    display: block;
-  }
-
-  .feature-card h3 {
-    font-size: 20px;
-    font-weight: 700;
-    margin-bottom: 10px;
-    letter-spacing: -0.5px;
-  }
-
-  .feature-card p {
-    font-size: 14px;
-    color: var(--muted);
-    line-height: 1.7;
-  }
-
-  /* ── PROJECT CARDS ── */
-  .projects-section { background: var(--surface); }
-
-  .filter-bar {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    margin-bottom: 40px;
-    align-items: center;
-  }
-
-  .filter-label {
-    font-size: 13px;
-    color: var(--muted);
-    margin-right: 6px;
-  }
-
-  .filter-chip {
-    padding: 7px 16px;
-    border-radius: 100px;
-    font-size: 13px;
-    font-weight: 500;
-    border: 1px solid var(--border);
-    background: transparent;
-    color: var(--muted);
-    cursor: pointer;
-    transition: all 0.2s;
-    font-family: 'DM Sans', sans-serif;
-  }
-
-  .filter-chip:hover, .filter-chip.active {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: #fff;
-  }
-
-  .projects-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-  }
-
-  .project-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    overflow: hidden;
-    transition: all 0.3s;
-  }
-
-  .project-card:hover {
-    border-color: rgba(124,92,252,0.3);
-    transform: translateY(-6px);
-    box-shadow: 0 24px 48px rgba(0,0,0,0.3);
-  }
-
-  .project-header {
-    padding: 24px 24px 0;
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-  }
-
-  .project-badge {
-    padding: 4px 12px;
-    border-radius: 100px;
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.5px;
-  }
-
-  .badge-ai { background: rgba(124,92,252,0.2); color: #b19dff; }
-  .badge-web { background: rgba(92,244,196,0.15); color: var(--accent3); }
-  .badge-app { background: rgba(252,92,125,0.15); color: #ff8fa3; }
-  .badge-open { background: rgba(255,200,80,0.15); color: #ffd066; }
-
-  .project-bookmark {
-    background: none;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    width: 32px; height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    color: var(--muted);
-    transition: all 0.2s;
-  }
-
-  .project-bookmark:hover { border-color: var(--accent); color: var(--accent); }
-
-  .project-body { padding: 20px 24px; }
-
-  .project-title {
-    font-size: 18px;
-    font-weight: 700;
-    margin-bottom: 8px;
-    letter-spacing: -0.5px;
-  }
-
-  .project-desc {
-    font-size: 13px;
-    color: var(--muted);
-    line-height: 1.6;
-    margin-bottom: 16px;
-  }
-
-  .stack-chips {
-    display: flex;
-    gap: 6px;
-    flex-wrap: wrap;
-    margin-bottom: 16px;
-  }
-
-  .stack-chip {
-    padding: 4px 10px;
-    border-radius: 6px;
-    font-size: 11px;
-    font-weight: 600;
-    background: var(--surface2);
-    color: var(--text);
-    border: 1px solid var(--border);
-  }
-
-  .project-meta {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    font-size: 12px;
-    color: var(--muted);
-    margin-bottom: 20px;
-  }
-
-  .meta-item {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-  }
-
-  .difficulty {
-    display: inline-flex;
-    gap: 3px;
-    align-items: center;
-  }
-
-  .diff-dot {
-    width: 6px; height: 6px;
-    border-radius: 50%;
-  }
-
-  .project-footer {
-    padding: 16px 24px;
-    border-top: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .project-author {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .author-avatar {
-    width: 32px; height: 32px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 14px;
-  }
-
-  .author-info { }
-  .author-name { font-size: 13px; font-weight: 500; }
-  .author-college { font-size: 11px; color: var(--muted); }
-
-  .project-actions {
-    display: flex;
-    gap: 8px;
-  }
-
-  .btn-join {
-    padding: 7px 18px;
-    border-radius: 8px;
-    background: linear-gradient(135deg, var(--accent), #9b6dff);
-    border: none;
-    color: #fff;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-
-  .btn-join:hover {
-    transform: scale(1.05);
-    box-shadow: 0 6px 16px rgba(124,92,252,0.4);
-  }
-
-  /* ── PARTNERS SECTION ── */
-  .partners-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 16px;
-  }
-
-  .partner-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 28px 20px;
-    text-align: center;
-    transition: all 0.3s;
-    position: relative;
-  }
-
-  .partner-card:hover {
-    border-color: rgba(124,92,252,0.4);
-    transform: translateY(-6px);
-    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-  }
-
-  .partner-avatar-wrap { position: relative; display: inline-block; margin-bottom: 16px; }
-
-  .partner-avatar {
-    width: 70px; height: 70px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 28px;
-    margin: 0 auto;
-  }
-
-  .status-dot {
-    position: absolute;
-    bottom: 3px; right: 3px;
-    width: 14px; height: 14px;
-    border-radius: 50%;
-    border: 2px solid var(--card);
-  }
-
-  .status-dot.online { background: var(--accent3); }
-  .status-dot.away { background: #ffd066; }
-
-  .partner-name {
-    font-size: 15px;
-    font-weight: 700;
-    margin-bottom: 4px;
-  }
-
-  .partner-title {
-    font-size: 12px;
-    color: var(--muted);
-    margin-bottom: 6px;
-  }
-
-  .partner-college {
-    font-size: 11px;
-    color: var(--muted);
-    margin-bottom: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-  }
-
-  .partner-match {
-    display: inline-block;
-    padding: 5px 14px;
-    border-radius: 100px;
-    font-size: 12px;
-    font-weight: 700;
-    margin-bottom: 14px;
-  }
-
-  .match-high {
-    background: rgba(92,244,196,0.15);
-    color: var(--accent3);
-    border: 1px solid rgba(92,244,196,0.25);
-  }
-
-  .match-mid {
-    background: rgba(124,92,252,0.15);
-    color: #b19dff;
-    border: 1px solid rgba(124,92,252,0.25);
-  }
-
-  .partner-skills {
-    display: flex;
-    gap: 5px;
-    flex-wrap: wrap;
-    justify-content: center;
-    margin-bottom: 16px;
-  }
-
-  .partner-actions {
-    display: flex;
-    gap: 8px;
-    justify-content: center;
-  }
-
-  .btn-sm {
-    padding: 7px 14px;
-    border-radius: 7px;
-    font-size: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    font-family: 'DM Sans', sans-serif;
-    transition: all 0.2s;
-  }
-
-  .btn-invite {
-    background: linear-gradient(135deg, var(--accent), #9b6dff);
-    border: none;
-    color: #fff;
-  }
-
-  .btn-invite:hover { box-shadow: 0 4px 12px rgba(124,92,252,0.4); }
-
-  .btn-save {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    color: var(--muted);
-  }
-
-  .btn-save:hover { color: var(--text); border-color: var(--text); }
-
-  /* ── COLLAB MODE TOGGLE ── */
-  .collab-section {
-    background: var(--surface);
-  }
-
-  .collab-inner {
-    background: linear-gradient(135deg, rgba(124,92,252,0.1), rgba(252,92,125,0.08));
-    border: 1px solid rgba(124,92,252,0.2);
-    border-radius: 24px;
-    padding: 60px;
-    text-align: center;
-  }
-
-  .toggle-wrap {
-    display: inline-flex;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 4px;
-    margin: 32px auto;
-  }
-
-  .toggle-option {
-    padding: 10px 28px;
-    border-radius: 10px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    border: none;
-    font-family: 'DM Sans', sans-serif;
-    color: var(--muted);
-    background: transparent;
-    transition: all 0.3s;
-  }
-
-  .toggle-option.active {
-    background: linear-gradient(135deg, var(--accent), #9b6dff);
-    color: #fff;
-    box-shadow: 0 4px 14px rgba(124,92,252,0.4);
-  }
-
-  .collab-desc {
-    font-size: 16px;
-    color: var(--muted);
-    max-width: 460px;
-    margin: 0 auto 32px;
-    line-height: 1.7;
-  }
-
-  /* ── READINESS SCORE ── */
-  .readiness-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 32px;
-  }
-
-  .readiness-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 24px;
-  }
-
-  .readiness-title { font-size: 18px; font-weight: 700; }
-  .score-badge {
-    font-family: 'Syne', sans-serif;
-    font-size: 32px;
-    font-weight: 800;
-    background: linear-gradient(135deg, var(--accent3), #00d4aa);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  .progress-item {
-    margin-bottom: 16px;
-  }
-
-  .progress-label {
-    display: flex;
-    justify-content: space-between;
-    font-size: 13px;
-    color: var(--muted);
-    margin-bottom: 6px;
-  }
-
-  .progress-bar {
-    height: 6px;
-    background: var(--surface2);
-    border-radius: 100px;
-    overflow: hidden;
-  }
-
-  .progress-fill {
-    height: 100%;
-    border-radius: 100px;
-    background: linear-gradient(90deg, var(--accent), var(--accent3));
-    transition: width 1s ease;
-  }
-
-  /* ── CTA ── */
-  .cta-section {
-    padding: 100px 48px;
-    text-align: center;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .cta-bg {
-    position: absolute;
-    inset: 0;
-    background:
-      radial-gradient(ellipse 60% 80% at 50% 50%, rgba(124,92,252,0.2) 0%, transparent 70%);
-  }
-
-  .cta-section h2 {
-    font-size: clamp(36px, 5vw, 64px);
-    font-weight: 800;
-    letter-spacing: -2px;
-    position: relative;
-    z-index: 1;
-    margin-bottom: 16px;
-  }
-
-  .cta-section p {
-    font-size: 18px;
-    color: var(--muted);
-    margin-bottom: 40px;
-    position: relative;
-    z-index: 1;
-  }
-
-  .cta-btns {
-    display: flex;
-    gap: 16px;
-    justify-content: center;
-    position: relative;
-    z-index: 1;
-  }
-
-  /* ── FOOTER ── */
-  footer {
-    background: var(--surface);
-    border-top: 1px solid var(--border);
-    padding: 60px 48px 40px;
-  }
-
-  .footer-grid {
-    display: grid;
-    grid-template-columns: 2fr 1fr 1fr 1fr;
-    gap: 48px;
-    margin-bottom: 48px;
-  }
-
-  .footer-brand p {
-    font-size: 14px;
-    color: var(--muted);
-    line-height: 1.7;
-    margin-top: 12px;
-    max-width: 260px;
-  }
-
-  .footer-col h4 {
-    font-size: 13px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 16px;
-  }
-
-  .footer-col ul { list-style: none; }
-  .footer-col ul li { margin-bottom: 10px; }
-  .footer-col ul a {
-    text-decoration: none;
-    color: var(--muted);
-    font-size: 14px;
-    transition: color 0.2s;
-  }
-  .footer-col ul a:hover { color: var(--text); }
-
-  .footer-bottom {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding-top: 32px;
-    border-top: 1px solid var(--border);
-    font-size: 13px;
-    color: var(--muted);
-  }
-
-  .social-links { display: flex; gap: 12px; }
-
-  .social-link {
-    width: 36px; height: 36px;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-decoration: none;
-    color: var(--muted);
-    font-size: 15px;
-    transition: all 0.2s;
-  }
-
-  .social-link:hover {
-    border-color: var(--accent);
-    color: var(--accent);
-  }
-
-  /* ── INTERESTS SECTION ── */
-  .interests-row {
-    display: flex;
-    gap: 16px;
-    flex-wrap: wrap;
-    margin-bottom: 60px;
-  }
-
-  .interest-pill {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 12px 20px;
-    border-radius: 100px;
-    border: 1px solid var(--border);
-    background: var(--card);
-    cursor: pointer;
-    transition: all 0.3s;
-    font-size: 14px;
-    font-weight: 500;
-  }
-
-  .interest-pill:hover {
-    border-color: var(--accent);
-    background: rgba(124,92,252,0.1);
-    transform: translateY(-3px);
-  }
-
-  .interest-pill.selected {
-    border-color: var(--accent);
-    background: rgba(124,92,252,0.15);
-    color: #b19dff;
-  }
-
-  .interest-icon { font-size: 18px; }
-  .interest-count { font-size: 11px; color: var(--muted); }
-
-  /* ── NEARBY SUGGESTION ── */
-  .nearby-banner {
-    background: linear-gradient(135deg, rgba(92,244,196,0.08), rgba(124,92,252,0.08));
-    border: 1px solid rgba(92,244,196,0.2);
-    border-radius: 16px;
-    padding: 20px 28px;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    margin-bottom: 40px;
-  }
-
-  .nearby-icon { font-size: 28px; }
-
-  .nearby-text h4 { font-size: 15px; font-weight: 600; margin-bottom: 3px; }
-  .nearby-text p { font-size: 13px; color: var(--muted); }
-
-  .nearby-btn {
-    margin-left: auto;
-    padding: 8px 20px;
-    border-radius: 8px;
-    border: 1px solid rgba(92,244,196,0.3);
-    background: transparent;
-    color: var(--accent3);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-    white-space: nowrap;
-  }
-
-  .nearby-btn:hover {
-    background: rgba(92,244,196,0.15);
-  }
-
-  /* ── RESPONSIVE ── */
-  @media (max-width: 1100px) {
-    .hero-cards { display: none; }
-    .partners-grid { grid-template-columns: repeat(2, 1fr); }
-    .footer-grid { grid-template-columns: 1fr 1fr; }
-  }
-
-  @media (max-width: 768px) {
-    nav { padding: 14px 20px; }
-    nav ul { display: none; }
-    section, .hero { padding: 80px 20px; }
-    .steps { grid-template-columns: 1fr; }
-    .features-grid { grid-template-columns: 1fr; }
-    .projects-grid { grid-template-columns: 1fr; }
-    .partners-grid { grid-template-columns: 1fr 1fr; }
-    .footer-grid { grid-template-columns: 1fr; }
-    .hero-stats { flex-wrap: wrap; gap: 24px; }
-    .collab-inner { padding: 40px 24px; }
-    .cta-section { padding: 80px 20px; }
-    footer { padding: 60px 20px 40px; }
-  }
-
-  /* ── ANIMATIONS ── */
-  .fade-in {
-    opacity: 0;
-    transform: translateY(30px);
-    transition: opacity 0.6s ease, transform 0.6s ease;
-  }
-
-  .fade-in.visible {
-    opacity: 1;
-    transform: translateY(0);
-  }
-
-  /* Stagger children */
-  .stagger > * {
-    opacity: 0;
-    transform: translateY(20px);
-    transition: opacity 0.5s ease, transform 0.5s ease;
-  }
-
-  .stagger.visible > *:nth-child(1) { opacity: 1; transform: translateY(0); transition-delay: 0s; }
-  .stagger.visible > *:nth-child(2) { opacity: 1; transform: translateY(0); transition-delay: 0.1s; }
-  .stagger.visible > *:nth-child(3) { opacity: 1; transform: translateY(0); transition-delay: 0.2s; }
-  .stagger.visible > *:nth-child(4) { opacity: 1; transform: translateY(0); transition-delay: 0.3s; }
-  .stagger.visible > *:nth-child(5) { opacity: 1; transform: translateY(0); transition-delay: 0.4s; }
-  .stagger.visible > *:nth-child(6) { opacity: 1; transform: translateY(0); transition-delay: 0.5s; }
-
-  /* Smooth match percentage bar animation */
-  @keyframes grow {
-    from { width: 0; }
-  }
+:root {
+  --bg:#07070e; --surface:#0f0f1a; --surface2:#161625; --border:#1e1e32; --border2:#2a2a45;
+  --accent:#6c47ff; --accent-glow:rgba(108,71,255,0.35); --pink:#ff4d8d; --teal:#00e5c4;
+  --yellow:#ffd060; --text:#eeeeff; --muted:#6b6b9a; --muted2:#9898c0; --card:#0d0d1c;
+  --radius:16px; --radius-sm:10px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Cabinet Grotesk',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;min-height:100vh;}
+h1,h2,h3,h4,.logo-text{font-family:'Clash Display',sans-serif;}
+body::after{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");pointer-events:none;z-index:9999;}
+.page{display:none;min-height:100vh;}.page.active{display:flex;}
+input,textarea,select{width:100%;padding:12px 16px;border-radius:var(--radius-sm);border:1px solid var(--border2);background:var(--surface);color:var(--text);font-family:'Cabinet Grotesk',sans-serif;font-size:15px;outline:none;transition:border-color .2s,box-shadow .2s;}
+input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow);}
+input::placeholder,textarea::placeholder{color:var(--muted);}
+select option{background:var(--surface2);}
+label{display:block;font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted2);margin-bottom:8px;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 28px;border-radius:var(--radius-sm);font-family:'Cabinet Grotesk',sans-serif;font-size:15px;font-weight:700;cursor:pointer;border:none;transition:all .2s;text-decoration:none;white-space:nowrap;}
+.btn-primary{background:var(--accent);color:#fff;}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 32px var(--accent-glow);}
+.btn-ghost{background:transparent;color:var(--muted2);border:1px solid var(--border2);}
+.btn-ghost:hover{border-color:var(--accent);color:var(--text);}
+.btn-full{width:100%;}.btn-lg{padding:14px 36px;font-size:16px;border-radius:var(--radius);}
+.btn-sm{padding:8px 18px;font-size:13px;}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none!important;}
+#toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:12px 24px;border-radius:100px;font-size:14px;font-weight:600;z-index:9000;transition:transform .35s cubic-bezier(.4,0,.2,1),opacity .35s;opacity:0;white-space:nowrap;box-shadow:0 8px 32px rgba(0,0,0,.4);}
+#toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
+#toast.error{border-color:var(--pink);}#toast.success{border-color:var(--teal);}
+/* AUTH */
+#page-auth{flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;position:relative;overflow:hidden;}
+.auth-bg{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 70% 60% at 20% 20%,rgba(108,71,255,.18) 0%,transparent 55%),radial-gradient(ellipse 50% 50% at 80% 80%,rgba(255,77,141,.12) 0%,transparent 50%),radial-gradient(ellipse 40% 40% at 70% 20%,rgba(0,229,196,.08) 0%,transparent 45%);}
+.auth-logo{display:flex;align-items:center;gap:12px;margin-bottom:40px;position:relative;z-index:1;}
+.auth-logo-icon{width:48px;height:48px;background:linear-gradient(135deg,var(--accent),var(--pink));border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;}
+.auth-logo-text{font-size:26px;font-weight:700;font-family:'Clash Display',sans-serif;}
+.auth-logo-text span{color:var(--accent);}
+.auth-card{background:var(--card);border:1px solid var(--border2);border-radius:24px;padding:40px;width:100%;max-width:440px;position:relative;z-index:1;box-shadow:0 32px 80px rgba(0,0,0,.5);}
+.auth-tabs{display:flex;background:var(--surface);border-radius:var(--radius-sm);padding:4px;margin-bottom:32px;gap:4px;}
+.auth-tab{flex:1;padding:10px;border:none;border-radius:8px;background:transparent;color:var(--muted);font-family:'Cabinet Grotesk',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;}
+.auth-tab.active{background:var(--accent);color:#fff;}
+.auth-form{display:flex;flex-direction:column;gap:20px;}
+.auth-form h2{font-size:26px;font-weight:700;margin-bottom:4px;}
+.auth-form p{color:var(--muted2);font-size:14px;margin-bottom:8px;}
+.form-group{display:flex;flex-direction:column;}
+.auth-divider{text-align:center;color:var(--muted);font-size:13px;margin:4px 0;}
+/* ONBOARD */
+#page-onboard{flex-direction:column;align-items:center;justify-content:flex-start;padding:60px 20px 40px;position:relative;overflow:hidden;}
+.onboard-bg{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 60% 50% at 50% 0%,rgba(108,71,255,.15) 0%,transparent 60%);}
+.onboard-wrap{width:100%;max-width:680px;position:relative;z-index:1;}
+.onboard-step{display:none;}.onboard-step.active{display:block;animation:fadeSlideUp .4s ease both;}
+@keyframes fadeSlideUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+.step-indicator{display:flex;align-items:center;gap:8px;margin-bottom:40px;}
+.step-dot{width:8px;height:8px;border-radius:50%;background:var(--border2);transition:all .3s;}
+.step-dot.done{background:var(--accent);}
+.step-dot.active{background:var(--accent);width:24px;border-radius:4px;}
+.step-label{font-size:13px;color:var(--muted);font-weight:600;margin-left:8px;}
+.onboard-title{font-size:clamp(28px,4vw,42px);font-weight:700;letter-spacing:-1px;margin-bottom:12px;line-height:1.15;}
+.onboard-sub{font-size:16px;color:var(--muted2);margin-bottom:36px;line-height:1.6;}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.pill-grid{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px;}
+.interest-pill-pick{display:flex;align-items:center;gap:8px;padding:10px 18px;border-radius:100px;border:1.5px solid var(--border2);background:var(--surface);color:var(--muted2);font-family:'Cabinet Grotesk',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;user-select:none;}
+.interest-pill-pick:hover{border-color:var(--accent);color:var(--text);}
+.interest-pill-pick.selected{border-color:var(--accent);background:rgba(108,71,255,.18);color:var(--text);}
+.skill-pill-pick{padding:8px 16px;border-radius:100px;border:1.5px solid var(--border2);background:var(--surface);color:var(--muted2);font-family:'Cabinet Grotesk',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;user-select:none;}
+.skill-pill-pick:hover{border-color:var(--teal);color:var(--text);}
+.skill-pill-pick.selected{border-color:var(--teal);background:rgba(0,229,196,.12);color:var(--teal);}
+.onboard-nav{display:flex;justify-content:space-between;align-items:center;margin-top:40px;gap:12px;}
+.mode-card{padding:24px 28px;border-radius:16px;border:2px solid var(--border2);background:var(--card);cursor:pointer;transition:all .25s;}
+.mode-card:hover{border-color:var(--accent);}
+.mode-card.selected{border-color:var(--accent);background:rgba(108,71,255,.1);box-shadow:0 0 0 3px var(--accent-glow);}
+/* APP NAV */
+#page-app{flex-direction:column;}
+.app-nav{position:sticky;top:0;z-index:500;display:flex;align-items:center;justify-content:space-between;padding:0 40px;height:64px;background:rgba(7,7,14,.9);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;}
+.nav-logo-icon{width:34px;height:34px;background:linear-gradient(135deg,var(--accent),var(--pink));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;}
+.nav-logo-text{font-size:17px;font-weight:700;color:var(--text);font-family:'Clash Display',sans-serif;}
+.nav-logo-text span{color:var(--accent);}
+.nav-tabs{display:flex;gap:4px;align-items:center;}
+.nav-tab{padding:7px 18px;border-radius:8px;border:none;background:transparent;color:var(--muted);font-family:'Cabinet Grotesk',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;}
+.nav-tab:hover{color:var(--text);background:var(--surface);}
+.nav-tab.active{background:var(--surface2);color:var(--text);}
+.nav-user{display:flex;align-items:center;gap:12px;}
+.nav-avatar{width:36px;height:36px;border-radius:50%;border:2px solid var(--accent);background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;}
+.nav-name{font-size:14px;font-weight:600;color:var(--text);}
+.app-content{flex:1;}
+.app-view{display:none;}.app-view.active{display:block;animation:fadeIn .3s ease;}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.section-wrap{max-width:1200px;margin:0 auto;padding:48px 40px;}
+.section-eyebrow{font-size:11px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--accent);margin-bottom:12px;}
+.section-heading{font-size:clamp(26px,3vw,40px);font-weight:700;letter-spacing:-1px;margin-bottom:10px;line-height:1.15;}
+.section-sub{font-size:15px;color:var(--muted2);margin-bottom:36px;line-height:1.6;}
+/* DASHBOARD */
+.dash-hero{background:linear-gradient(135deg,rgba(108,71,255,.12),rgba(255,77,141,.06));border:1px solid var(--border2);border-radius:24px;padding:40px;display:flex;align-items:center;justify-content:space-between;gap:24px;margin-bottom:36px;position:relative;overflow:hidden;}
+.dash-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 80% at 80% 50%,rgba(108,71,255,.1),transparent);pointer-events:none;}
+.dash-hero-text h2{font-size:30px;font-weight:700;margin-bottom:8px;}
+.dash-hero-text p{color:var(--muted2);font-size:15px;line-height:1.6;max-width:400px;}
+.dash-hero-emoji{font-size:72px;flex-shrink:0;}
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:36px;}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:24px 20px;transition:border-color .2s;}
+.stat-card:hover{border-color:var(--border2);}
+.stat-num{font-family:'Clash Display',sans-serif;font-size:34px;font-weight:700;line-height:1;background:linear-gradient(135deg,var(--accent),var(--teal));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:6px;}
+.stat-label{font-size:13px;color:var(--muted);font-weight:600;}
+.two-pane{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
+.panel{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:28px;overflow:hidden;}
+.panel-title{font-size:16px;font-weight:700;margin-bottom:20px;}
+.match-preview-item{display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid var(--border);}
+.match-preview-item:last-child{border-bottom:none;}
+.mp-avatar{width:44px;height:44px;border-radius:50%;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;border:2px solid var(--border2);}
+.mp-info{flex:1;min-width:0;}
+.mp-name{font-size:14px;font-weight:700;margin-bottom:3px;}
+.mp-role{font-size:12px;color:var(--muted2);}
+.mp-pct{font-size:13px;font-weight:800;padding:4px 10px;border-radius:100px;flex-shrink:0;}
+.chip-list{display:flex;flex-wrap:wrap;gap:8px;}
+.chip{padding:5px 12px;border-radius:100px;font-size:12px;font-weight:600;background:var(--surface2);border:1px solid var(--border2);color:var(--muted2);}
+.chip-accent{border-color:rgba(108,71,255,.4);color:#b099ff;background:rgba(108,71,255,.1);}
+.chip-teal{border-color:rgba(0,229,196,.3);color:var(--teal);background:rgba(0,229,196,.08);}
+/* MATCHES */
+.matches-filter{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:32px;}
+.filter-btn{padding:8px 18px;border-radius:100px;border:1.5px solid var(--border2);background:transparent;color:var(--muted2);font-family:'Cabinet Grotesk',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;}
+.filter-btn:hover,.filter-btn.active{border-color:var(--accent);color:var(--text);background:rgba(108,71,255,.12);}
+.matches-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;}
+.match-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:24px;transition:all .25s;position:relative;overflow:hidden;}
+.match-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--pink));transform:scaleX(0);transform-origin:left;transition:transform .3s;}
+.match-card:hover{border-color:rgba(108,71,255,.4);transform:translateY(-4px);box-shadow:0 16px 48px rgba(0,0,0,.4);}
+.match-card:hover::before{transform:scaleX(1);}
+.mc-avatar-wrap{position:relative;display:inline-block;margin-bottom:16px;}
+.mc-avatar{width:64px;height:64px;border-radius:50%;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:30px;border:2px solid var(--border2);}
+.mc-online{position:absolute;bottom:2px;right:2px;width:14px;height:14px;border-radius:50%;background:var(--teal);border:2px solid var(--card);}
+.mc-name{font-size:17px;font-weight:700;margin-bottom:3px;}
+.mc-role{font-size:13px;color:var(--muted2);margin-bottom:4px;}
+.mc-college{font-size:12px;color:var(--muted);margin-bottom:14px;}
+.mc-match-pct{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:100px;margin-bottom:16px;font-size:13px;font-weight:800;}
+.pct-high{background:rgba(0,229,196,.12);color:var(--teal);border:1px solid rgba(0,229,196,.25);}
+.pct-mid{background:rgba(108,71,255,.12);color:#b099ff;border:1px solid rgba(108,71,255,.25);}
+.pct-low{background:rgba(255,208,96,.12);color:var(--yellow);border:1px solid rgba(255,208,96,.25);}
+.mc-shared-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:8px;}
+.mc-skills{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:18px;}
+.mc-skill-chip{padding:4px 10px;border-radius:100px;font-size:11px;font-weight:600;background:var(--surface2);border:1px solid var(--border2);color:var(--muted2);}
+.mc-actions{display:flex;gap:8px;}
+.btn-connect{flex:1;padding:9px;border-radius:8px;background:var(--accent);border:none;color:#fff;font-family:'Cabinet Grotesk',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn-connect:hover{box-shadow:0 4px 16px var(--accent-glow);}
+.btn-save-m{padding:9px 14px;border-radius:8px;background:var(--surface2);border:1px solid var(--border2);color:var(--muted2);font-family:'Cabinet Grotesk',sans-serif;font-size:13px;cursor:pointer;transition:all .2s;}
+.btn-save-m:hover{border-color:var(--pink);color:var(--pink);}
+/* PROJECTS */
+.projects-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;flex-wrap:wrap;gap:16px;}
+.filter-bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.filter-label{font-size:13px;color:var(--muted);font-weight:600;margin-right:4px;}
+.f-chip{padding:7px 16px;border-radius:100px;font-size:12px;font-weight:700;border:1.5px solid var(--border2);background:transparent;color:var(--muted2);cursor:pointer;font-family:'Cabinet Grotesk',sans-serif;transition:all .2s;}
+.f-chip:hover,.f-chip.active{border-color:var(--accent);color:var(--text);background:rgba(108,71,255,.12);}
+.projects-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:20px;}
+.project-card{background:var(--card);border:1px solid var(--border);border-radius:20px;overflow:hidden;transition:all .25s;}
+.project-card:hover{border-color:rgba(108,71,255,.3);transform:translateY(-5px);box-shadow:0 20px 48px rgba(0,0,0,.4);}
+.pc-top{padding:22px 22px 0;display:flex;align-items:center;justify-content:space-between;}
+.pc-tag{padding:4px 12px;border-radius:100px;font-size:11px;font-weight:700;letter-spacing:.5px;}
+.tag-ai{background:rgba(108,71,255,.2);color:#b099ff;}
+.tag-web{background:rgba(0,229,196,.12);color:var(--teal);}
+.tag-app{background:rgba(255,77,141,.12);color:#ff8fb0;}
+.tag-open{background:rgba(255,208,96,.12);color:var(--yellow);}
+.pc-diff{display:flex;gap:3px;}
+.pc-dot{width:7px;height:7px;border-radius:50%;}
+.pc-body{padding:16px 22px;}
+.pc-title{font-size:17px;font-weight:700;margin-bottom:7px;letter-spacing:-.3px;}
+.pc-desc{font-size:13px;color:var(--muted2);line-height:1.6;margin-bottom:14px;}
+.pc-stack{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;}
+.pc-chip{padding:4px 10px;border-radius:6px;font-size:11px;font-weight:700;background:var(--surface2);border:1px solid var(--border2);color:var(--text);}
+.pc-meta{display:flex;gap:14px;font-size:12px;color:var(--muted);}
+.pc-foot{padding:14px 22px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.pc-author{display:flex;align-items:center;gap:10px;}
+.pc-avatar{width:30px;height:30px;border-radius:50%;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:14px;}
+.pc-author-name{font-size:13px;font-weight:600;}
+.pc-author-col{font-size:11px;color:var(--muted);}
+.btn-join-p{padding:7px 18px;border-radius:8px;background:linear-gradient(135deg,var(--accent),#9470ff);border:none;color:#fff;font-family:'Cabinet Grotesk',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn-join-p:hover{box-shadow:0 4px 16px var(--accent-glow);}
+/* PROFILE */
+.profile-hero{display:flex;align-items:flex-start;gap:32px;padding:40px;background:var(--card);border:1px solid var(--border);border-radius:24px;margin-bottom:28px;}
+.profile-avatar{width:90px;height:90px;border-radius:50%;flex-shrink:0;background:var(--surface2);border:3px solid var(--accent);display:flex;align-items:center;justify-content:center;font-size:44px;}
+.profile-name{font-size:28px;font-weight:700;margin-bottom:4px;}
+.profile-role{font-size:16px;color:var(--muted2);margin-bottom:4px;}
+.profile-college{font-size:14px;color:var(--muted);margin-bottom:16px;}
+.profile-bio{font-size:14px;color:var(--muted2);line-height:1.7;max-width:500px;}
+.profile-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+.edit-panel{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:28px;}
+.edit-panel h3{font-size:17px;font-weight:700;margin-bottom:20px;}
+.edit-field{margin-bottom:20px;}
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);z-index:800;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .25s;}
+.modal-overlay.open{opacity:1;pointer-events:all;}
+.modal{background:var(--surface);border:1px solid var(--border2);border-radius:24px;padding:40px;width:100%;max-width:520px;transform:translateY(20px);transition:transform .25s;position:relative;max-height:90vh;overflow-y:auto;}
+.modal-overlay.open .modal{transform:translateY(0);}
+.modal-close{position:absolute;top:16px;right:16px;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;width:32px;height:32px;color:var(--muted2);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all .2s;}
+.modal-close:hover{border-color:var(--pink);color:var(--pink);}
+.modal h3{font-size:22px;font-weight:700;margin-bottom:6px;}
+.modal p.sub{font-size:13px;color:var(--muted2);margin-bottom:28px;}
+.modal-field{margin-bottom:20px;}
+.modal-error{color:var(--pink);font-size:13px;margin-bottom:12px;display:none;}
+/* SPINNER */
+.spinner{display:inline-block;width:18px;height:18px;border:2px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;}
+.spinner-lg{width:40px;height:40px;border-width:3px;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-state{display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;padding:60px 0;color:var(--muted2);font-size:15px;}
+.empty-state{text-align:center;padding:60px 20px;color:var(--muted2);}
+.empty-state .empty-icon{font-size:48px;margin-bottom:16px;}
+.empty-state h3{font-size:20px;font-weight:700;color:var(--text);margin-bottom:8px;}
+.empty-state p{font-size:14px;line-height:1.6;}
+@media(max-width:768px){
+  .app-nav{padding:0 20px;}
+  .section-wrap{padding:32px 20px;}
+  .two-col,.two-pane,.profile-grid{grid-template-columns:1fr;}
+  .stats-row{grid-template-columns:1fr 1fr;}
+  .dash-hero{flex-direction:column;}
+  .dash-hero-emoji{display:none;}
+  .auth-card{padding:28px 24px;}
+  .nav-tabs{display:none;}
+  .matches-grid,.projects-grid{grid-template-columns:1fr;}
+}
 </style>
 </head>
 <body>
 
-<!-- NAV -->
-<nav>
-  <a href="#" class="logo">
-    <div class="logo-icon">🔗</div>
-    <span class="logo-text">Partner<span>Forge</span></span>
-  </a>
-  <ul>
-    <li><a href="#how">How It Works</a></li>
-    <li><a href="#projects">Find Partners</a></li>
-    <li><a href="#post">Post Project</a></li>
-    <li><a href="#features">Features</a></li>
-  </ul>
-  <div class="nav-actions">
-    <a href="#" class="btn-ghost">Login</a>
-    <a href="#" class="btn-primary">Sign Up Free</a>
+<!-- AUTH PAGE -->
+<div id="page-auth" class="page active">
+  <div class="auth-bg"></div>
+  <div class="auth-logo">
+    <div class="auth-logo-icon">🔗</div>
+    <div class="auth-logo-text">Partner<span>Forge</span></div>
   </div>
-</nav>
-
-<!-- HERO -->
-<section class="hero" id="home">
-  <div class="hero-bg"></div>
-  <div class="orb orb1"></div>
-  <div class="orb orb2"></div>
-  <div class="orb orb3"></div>
-
-  <div class="hero-content">
-    <div class="hero-badge">
-      <span class="dot"></span>
-      Now with AI-powered skill matching
+  <div class="auth-card">
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tab-signup" onclick="switchAuthTab('signup')">Create Account</button>
+      <button class="auth-tab" id="tab-login" onclick="switchAuthTab('login')">Sign In</button>
     </div>
-    <h1>Find the Perfect<br><span class="gradient-text">Partner</span> for Your<br>Next Project</h1>
-    <p>Connect with students who share your vision. Match on skills, interests, and tech stacks — then build something amazing together.</p>
-    <div class="hero-btns">
-      <a href="#projects" class="btn-primary btn-lg">🔍 Find Partners</a>
-      <button class="btn-outline-lg" onclick="scrollToPost()">✦ Post a Project</button>
-    </div>
-    <div class="hero-stats">
-      <div class="stat-item">
-        <div class="stat-num">2,400+</div>
-        <div class="stat-label">Active Students</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-num">840+</div>
-        <div class="stat-label">Projects Posted</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-num">94%</div>
-        <div class="stat-label">Match Satisfaction</div>
+    <div id="auth-signup">
+      <div class="auth-form">
+        <div><h2>Start building 🚀</h2><p>Join students finding their perfect project partners</p></div>
+        <div class="form-group"><label>Your Name</label><input id="signup-name" type="text" placeholder="e.g. Priya Sharma" /></div>
+        <div class="form-group"><label>Email Address</label><input id="signup-email" type="email" placeholder="you@university.edu" /></div>
+        <div id="signup-error" style="color:var(--pink);font-size:13px;display:none;"></div>
+        <button class="btn btn-primary btn-full btn-lg" id="signup-btn" onclick="handleSignup()">Create Free Account →</button>
+        <div class="auth-divider">No password needed — we keep it simple</div>
       </div>
     </div>
-  </div>
-
-  <!-- Floating preview cards -->
-  <div class="hero-cards">
-    <div class="hero-mini-card">
-      <div class="mc-top">
-        <div class="mc-avatar" style="background: linear-gradient(135deg, #7c5cfc, #fc5c7d);">👩‍💻</div>
-        <div>
-          <div class="mc-name">Priya S.</div>
-          <div class="mc-role">ML Engineer</div>
-        </div>
-        <div class="mc-match">94% match</div>
+    <div id="auth-login" style="display:none;">
+      <div class="auth-form">
+        <div><h2>Welcome back 👋</h2><p>Sign in with your email to continue</p></div>
+        <div class="form-group"><label>Email Address</label><input id="login-email" type="email" placeholder="you@university.edu" /></div>
+        <div id="login-error" style="color:var(--pink);font-size:13px;display:none;"></div>
+        <button class="btn btn-primary btn-full btn-lg" id="login-btn" onclick="handleLogin()">Sign In →</button>
       </div>
-      <div class="mc-skills">
-        <span class="skill-chip">Python</span>
-        <span class="skill-chip">TensorFlow</span>
-        <span class="skill-chip">React</span>
-      </div>
-    </div>
-    <div class="hero-mini-card">
-      <div class="mc-top">
-        <div class="mc-avatar" style="background: linear-gradient(135deg, #5cf4c4, #3b82f6);">🧑‍🎨</div>
-        <div>
-          <div class="mc-name">Arjun M.</div>
-          <div class="mc-role">UI/UX Designer</div>
-        </div>
-        <div class="mc-match">88% match</div>
-      </div>
-      <div class="mc-skills">
-        <span class="skill-chip">Figma</span>
-        <span class="skill-chip">CSS</span>
-        <span class="skill-chip">Vue.js</span>
-      </div>
-    </div>
-    <div class="hero-mini-card">
-      <div class="mc-top">
-        <div class="mc-avatar" style="background: linear-gradient(135deg, #fc5c7d, #ffd066);">👨‍🔬</div>
-        <div>
-          <div class="mc-name">Lena K.</div>
-          <div class="mc-role">Backend Dev</div>
-        </div>
-        <div class="mc-match">81% match</div>
-      </div>
-      <div class="mc-skills">
-        <span class="skill-chip">Node.js</span>
-        <span class="skill-chip">MongoDB</span>
-        <span class="skill-chip">Docker</span>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- HOW IT WORKS -->
-<section class="how-section" id="how">
-  <div class="section-label">Process</div>
-  <h2 class="section-title">From idea to team in<br>three steps</h2>
-  <p class="section-sub fade-in">No awkward cold messages. Our smart system surfaces the right partners based on your actual skills and interests.</p>
-
-  <div class="steps stagger">
-    <div class="step">
-      <div class="step-num">01</div>
-      <div class="step-icon" style="background: rgba(124,92,252,0.15);">🧑‍💼</div>
-      <h3>Create Your Profile</h3>
-      <p>Add your skills, interests, experience level, and what you're hoping to build. Takes under 2 minutes and no CV required.</p>
-    </div>
-    <div class="step">
-      <div class="step-num">02</div>
-      <div class="step-icon" style="background: rgba(92,244,196,0.12);">⚡</div>
-      <h3>Add Skills & Interests</h3>
-      <p>Tag yourself with tech stacks you love — React, Python, AI, UI/UX — and pick areas like Hackathons, Open Source, or Startups.</p>
-    </div>
-    <div class="step">
-      <div class="step-num">03</div>
-      <div class="step-icon" style="background: rgba(252,92,125,0.12);">🚀</div>
-      <h3>Find & Connect</h3>
-      <p>Browse skill-matched partners, join open projects, or post your own idea. One click to invite, collaborate, or save for later.</p>
-    </div>
-  </div>
-</section>
-
-<!-- FEATURES -->
-<section id="features">
-  <div class="section-label">What You Get</div>
-  <h2 class="section-title">Built for real student<br>collaboration</h2>
-  <p class="section-sub">Every feature designed around how students actually work and connect.</p>
-
-  <div class="features-grid stagger">
-    <div class="feature-card">
-      <span class="feature-icon">🎯</span>
-      <h3>Skill Match Percentage</h3>
-      <p>Our algorithm compares your skills against potential partners and project needs, giving you a compatibility score so you know instantly who's a great fit.</p>
-    </div>
-    <div class="feature-card">
-      <span class="feature-icon">💡</span>
-      <h3>Idea Pitch Cards</h3>
-      <p>Post your project as a structured pitch with title, description, tech stack, difficulty level, and how many teammates you need. Clear, scannable, and actionable.</p>
-    </div>
-    <div class="feature-card">
-      <span class="feature-icon">🔄</span>
-      <h3>Collaboration Mode Toggle</h3>
-      <p>Switch between "Looking for Partners" (you have an idea) and "Ready to Join" (you want to contribute) modes. Your visibility adapts instantly.</p>
-    </div>
-    <div class="feature-card">
-      <span class="feature-icon">🧩</span>
-      <h3>Interest-Based Discovery</h3>
-      <p>Browse by interest areas: Web Dev, AI/ML, App Dev, Open Source, and Hackathons. Find projects and people aligned with what excites you most.</p>
-    </div>
-    <div class="feature-card">
-      <span class="feature-icon">📊</span>
-      <h3>Project Readiness Score</h3>
-      <p>A dynamic score based on your profile completeness, recent activity, and project details. Higher score = more visibility and better matches.</p>
-    </div>
-    <div class="feature-card">
-      <span class="feature-icon">🌍</span>
-      <h3>Nearby Collaborators</h3>
-      <p>Optionally surface students from the same college or city for easier in-person collaboration. IRL teamwork, enabled digitally.</p>
-    </div>
-    <div class="feature-card">
-      <span class="feature-icon">🔗</span>
-      <h3>Quick Connect Actions</h3>
-      <p>Invite, Collaborate, or Save partners with a single click. No friction, no lengthy forms — just direct action when inspiration strikes.</p>
-    </div>
-    <div class="feature-card">
-      <span class="feature-icon">🏳️</span>
-      <h3>Beginner-Friendly</h3>
-      <p>Difficulty tags on every project (Beginner / Intermediate / Advanced) mean new coders find welcoming teams, not intimidating gatekeeping.</p>
-    </div>
-  </div>
-</section>
-
-<!-- INTEREST DISCOVERY + PROJECTS -->
-<section class="projects-section" id="projects">
-  <div class="section-label">Discover</div>
-  <h2 class="section-title">Browse open projects</h2>
-  <p class="section-sub">Real student ideas looking for collaborators right now. Filter by what you love.</p>
-
-  <!-- Nearby banner -->
-  <div class="nearby-banner fade-in">
-    <div class="nearby-icon">📍</div>
-    <div class="nearby-text">
-      <h4>12 students near you at UCLA are looking for partners</h4>
-      <p>Enable location to discover collaborators in your college or city</p>
-    </div>
-    <button class="nearby-btn">Enable Location →</button>
-  </div>
-
-  <!-- Interest pills -->
-  <div class="interests-row" id="interestRow">
-    <div class="interest-pill selected" onclick="toggleInterest(this)">
-      <span class="interest-icon">🌐</span>
-      Web Dev
-      <span class="interest-count">240 projects</span>
-    </div>
-    <div class="interest-pill" onclick="toggleInterest(this)">
-      <span class="interest-icon">🤖</span>
-      AI / ML
-      <span class="interest-count">188 projects</span>
-    </div>
-    <div class="interest-pill" onclick="toggleInterest(this)">
-      <span class="interest-icon">📱</span>
-      App Dev
-      <span class="interest-count">152 projects</span>
-    </div>
-    <div class="interest-pill" onclick="toggleInterest(this)">
-      <span class="interest-icon">🧑‍💻</span>
-      Open Source
-      <span class="interest-count">96 projects</span>
-    </div>
-    <div class="interest-pill" onclick="toggleInterest(this)">
-      <span class="interest-icon">⚡</span>
-      Hackathons
-      <span class="interest-count">74 projects</span>
-    </div>
-  </div>
-
-  <!-- Tech filter chips -->
-  <div class="filter-bar">
-    <span class="filter-label">Stack:</span>
-    <button class="filter-chip active" onclick="filterProjects(this, 'All')">All</button>
-    <button class="filter-chip" onclick="filterProjects(this, 'React')">React</button>
-    <button class="filter-chip" onclick="filterProjects(this, 'Python')">Python</button>
-    <button class="filter-chip" onclick="filterProjects(this, 'AI / LLM')">AI / LLM</button>
-    <button class="filter-chip" onclick="filterProjects(this, 'UI/UX')">UI/UX</button>
-    <button class="filter-chip" onclick="filterProjects(this, 'Flutter')">Flutter</button>
-    <button class="filter-chip" onclick="filterProjects(this, 'Node.js')">Node.js</button>
-    <button class="filter-chip" onclick="filterProjects(this, 'Blockchain')">Blockchain</button>
-  </div>
-
-  <!-- Loading state shown while fetching from API -->
-  <div id="projectsLoading" style="text-align:center; color: var(--muted); padding: 60px 0; display:flex; align-items:center; justify-content:center; gap:10px;">
-    <span style="display:inline-block; width:18px; height:18px; border:2px solid var(--accent); border-top-color:transparent; border-radius:50%; animation: spin 0.7s linear infinite;"></span>
-    Loading projects…
-  </div>
-  <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
-
-  <div class="projects-grid stagger" id="projectsGrid" style="display:none">
-  </div>
-  </div>
-</section>
-
-<!-- FIND PARTNERS / USER CARDS -->
-<section id="partners">
-  <div class="section-label">People</div>
-  <h2 class="section-title">Top matches for you</h2>
-  <p class="section-sub">Students with complementary skills who are actively looking to collaborate.</p>
-
-  <div class="partners-grid stagger">
-    <div class="partner-card">
-      <div class="partner-avatar-wrap">
-        <div class="partner-avatar" style="background: linear-gradient(135deg, #7c5cfc, #fc5c7d);">👩‍💻</div>
-        <div class="status-dot online"></div>
-      </div>
-      <div class="partner-name">Priya Sharma</div>
-      <div class="partner-title">ML Engineer · 3rd Year</div>
-      <div class="partner-college">🏛 IIT Bombay · Mumbai</div>
-      <div class="partner-match match-high">94% Match</div>
-      <div class="partner-skills">
-        <span class="skill-chip">Python</span>
-        <span class="skill-chip">TensorFlow</span>
-        <span class="skill-chip">React</span>
-        <span class="skill-chip">LLMs</span>
-      </div>
-      <div style="font-size:12px; color: var(--muted); margin-bottom: 16px; font-style: italic;">"Looking to build AI tools that actually help people"</div>
-      <div class="partner-actions">
-        <button class="btn-sm btn-invite">✉ Invite</button>
-        <button class="btn-sm btn-save">🔖 Save</button>
-      </div>
-    </div>
-
-    <div class="partner-card">
-      <div class="partner-avatar-wrap">
-        <div class="partner-avatar" style="background: linear-gradient(135deg, #5cf4c4, #3b82f6);">🧑‍🎨</div>
-        <div class="status-dot online"></div>
-      </div>
-      <div class="partner-name">Arjun Mehta</div>
-      <div class="partner-title">UI/UX Designer · 2nd Year</div>
-      <div class="partner-college">🏛 UCLA · Los Angeles</div>
-      <div class="partner-match match-high">88% Match</div>
-      <div class="partner-skills">
-        <span class="skill-chip">Figma</span>
-        <span class="skill-chip">CSS</span>
-        <span class="skill-chip">Vue.js</span>
-      </div>
-      <div style="font-size:12px; color: var(--muted); margin-bottom: 16px; font-style: italic;">"Design is everything. Let's make something beautiful"</div>
-      <div class="partner-actions">
-        <button class="btn-sm btn-invite">✉ Invite</button>
-        <button class="btn-sm btn-save">🔖 Save</button>
-      </div>
-    </div>
-
-    <div class="partner-card">
-      <div class="partner-avatar-wrap">
-        <div class="partner-avatar" style="background: linear-gradient(135deg, #fc5c7d, #ffd066);">👩‍🔬</div>
-        <div class="status-dot away"></div>
-      </div>
-      <div class="partner-name">Lena Kovalenko</div>
-      <div class="partner-title">Backend Dev · 4th Year</div>
-      <div class="partner-college">🏛 TU Berlin · Berlin</div>
-      <div class="partner-match match-mid">81% Match</div>
-      <div class="partner-skills">
-        <span class="skill-chip">Node.js</span>
-        <span class="skill-chip">MongoDB</span>
-        <span class="skill-chip">Docker</span>
-      </div>
-      <div style="font-size:12px; color: var(--muted); margin-bottom: 16px; font-style: italic;">"Open source enthusiast. Love scalable systems"</div>
-      <div class="partner-actions">
-        <button class="btn-sm btn-invite">✉ Invite</button>
-        <button class="btn-sm btn-save">🔖 Save</button>
-      </div>
-    </div>
-
-    <div class="partner-card">
-      <div class="partner-avatar-wrap">
-        <div class="partner-avatar" style="background: linear-gradient(135deg, #ffd066, #fc5c7d);">🧑‍💼</div>
-        <div class="status-dot online"></div>
-      </div>
-      <div class="partner-name">Marcus Thompson</div>
-      <div class="partner-title">Full Stack · 3rd Year</div>
-      <div class="partner-college">🏛 MIT · Cambridge</div>
-      <div class="partner-match match-mid">76% Match</div>
-      <div class="partner-skills">
-        <span class="skill-chip">TypeScript</span>
-        <span class="skill-chip">GraphQL</span>
-        <span class="skill-chip">Go</span>
-      </div>
-      <div style="font-size:12px; color: var(--muted); margin-bottom: 16px; font-style: italic;">"Hackathon veteran. 5x winner at collegiate events"</div>
-      <div class="partner-actions">
-        <button class="btn-sm btn-invite">✉ Invite</button>
-        <button class="btn-sm btn-save">🔖 Save</button>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- COLLABORATION MODE + READINESS -->
-<section class="collab-section" id="post">
-  <div class="fade-in">
-  <div class="collab-inner">
-    <div class="section-label" style="text-align:center">Your Mode</div>
-    <h2 class="section-title" style="text-align:center">How do you want to collaborate?</h2>
-
-    <div class="toggle-wrap">
-      <button class="toggle-option active" id="toggleLooking" onclick="switchMode('looking')">🔍 Looking for Partners</button>
-      <button class="toggle-option" id="toggleReady" onclick="switchMode('ready')">🚀 Ready to Join Projects</button>
-    </div>
-
-    <p class="collab-desc" id="collabDesc">You have a project idea and you're looking for talented teammates to bring it to life. You'll appear in partner discovery feeds.</p>
-
-    <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 40px;">
-      <a href="#" class="btn-primary btn-lg">Post Your Project</a>
-      <button class="btn-outline-lg" style="border-color: var(--border)">View Your Profile</button>
-    </div>
-
-    <!-- Readiness Score Widget -->
-    <div style="max-width: 480px; margin: 0 auto;">
-      <div class="readiness-card">
-        <div class="readiness-header">
-          <span class="readiness-title">Profile Readiness Score</span>
-          <span class="score-badge">72%</span>
-        </div>
-        <div class="progress-item">
-          <div class="progress-label"><span>Profile Info</span><span>100%</span></div>
-          <div class="progress-bar"><div class="progress-fill" style="width: 100%"></div></div>
-        </div>
-        <div class="progress-item">
-          <div class="progress-label"><span>Skills Added</span><span>80%</span></div>
-          <div class="progress-bar"><div class="progress-fill" style="width: 80%"></div></div>
-        </div>
-        <div class="progress-item">
-          <div class="progress-label"><span>Project Posted</span><span>60%</span></div>
-          <div class="progress-bar"><div class="progress-fill" style="width: 60%; background: linear-gradient(90deg, var(--accent2), #ffd066)"></div></div>
-        </div>
-        <div class="progress-item">
-          <div class="progress-label"><span>Intro Video</span><span>0%</span></div>
-          <div class="progress-bar"><div class="progress-fill" style="width: 0%; background: linear-gradient(90deg, #ffd066, var(--accent3))"></div></div>
-        </div>
-        <p style="font-size: 12px; color: var(--muted); margin-top: 16px; text-align: center;">Add an intro video to boost your score to 100% and get 3× more profile views</p>
-      </div>
-    </div>
-  </div>
-  </div>
-</section>
-
-<!-- CTA -->
-<section class="cta-section">
-  <div class="cta-bg"></div>
-  <h2>Ready to build something<br><span style="background: linear-gradient(135deg, var(--accent), var(--accent2), var(--accent3)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">incredible?</span></h2>
-  <p>Join 2,400+ students already collaborating on PartnerForge</p>
-  <div class="cta-btns">
-    <a href="#" class="btn-primary btn-lg">Create Free Account</a>
-    <button class="btn-outline-lg">Explore Projects</button>
-  </div>
-</section>
-
-<!-- FOOTER -->
-<footer>
-  <div class="footer-grid">
-    <div class="footer-brand">
-      <a href="#" class="logo" style="margin-bottom: 12px; display: inline-flex;">
-        <div class="logo-icon">🔗</div>
-        <span class="logo-text">Partner<span>Forge</span></span>
-      </a>
-      <p>The student project collaboration platform. Find partners, build things, grow your skills — together.</p>
-    </div>
-    <div class="footer-col">
-      <h4>Platform</h4>
-      <ul>
-        <li><a href="#">Find Partners</a></li>
-        <li><a href="#">Post Project</a></li>
-        <li><a href="#">Browse Projects</a></li>
-        <li><a href="#">Leaderboard</a></li>
-      </ul>
-    </div>
-    <div class="footer-col">
-      <h4>Company</h4>
-      <ul>
-        <li><a href="#">About Us</a></li>
-        <li><a href="#">Blog</a></li>
-        <li><a href="#">Contact</a></li>
-        <li><a href="#">Privacy</a></li>
-      </ul>
-    </div>
-    <div class="footer-col">
-      <h4>Community</h4>
-      <ul>
-        <li><a href="#">Discord</a></li>
-        <li><a href="#">GitHub</a></li>
-        <li><a href="#">LinkedIn</a></li>
-        <li><a href="#">Newsletter</a></li>
-      </ul>
-    </div>
-  </div>
-
-  <div class="footer-bottom">
-    <span>© 2025 PartnerForge. Made for students, by students.</span>
-    <div class="social-links">
-      <a href="#" class="social-link" title="GitHub">⌥</a>
-      <a href="#" class="social-link" title="LinkedIn">in</a>
-      <a href="#" class="social-link" title="Twitter">𝕏</a>
-      <a href="#" class="social-link" title="Discord">◈</a>
-    </div>
-  </div>
-</footer>
-
-<!-- POST PROJECT MODAL -->
-<div id="postModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:1000; align-items:center; justify-content:center; backdrop-filter:blur(8px);">
-  <div style="background:var(--surface); border:1px solid var(--border); border-radius:24px; padding:40px; width:100%; max-width:540px; margin:20px; position:relative;">
-    <button onclick="closePostModal()" style="position:absolute; top:16px; right:16px; background:none; border:1px solid var(--border); border-radius:8px; width:32px; height:32px; color:var(--muted); cursor:pointer; font-size:16px;">✕</button>
-    <h3 style="font-family:'Syne',sans-serif; font-size:22px; font-weight:700; margin-bottom:8px;">Post a Project</h3>
-    <p style="font-size:13px; color:var(--muted); margin-bottom:28px;">Share your idea and find collaborators</p>
-    <div style="display:flex; flex-direction:column; gap:16px;">
-      <div>
-        <label style="font-size:12px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:1px; display:block; margin-bottom:6px;">Project Title *</label>
-        <input id="postTitle" placeholder="e.g. StudyBuddy — AI Tutor App" style="width:100%; padding:10px 14px; border-radius:10px; border:1px solid var(--border); background:var(--card); color:var(--text); font-family:'DM Sans',sans-serif; font-size:14px; outline:none;" />
-      </div>
-      <div>
-        <label style="font-size:12px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:1px; display:block; margin-bottom:6px;">Description</label>
-        <textarea id="postDesc" rows="3" placeholder="What are you building and what kind of teammates do you need?" style="width:100%; padding:10px 14px; border-radius:10px; border:1px solid var(--border); background:var(--card); color:var(--text); font-family:'DM Sans',sans-serif; font-size:14px; outline:none; resize:vertical;"></textarea>
-      </div>
-      <div>
-        <label style="font-size:12px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:1px; display:block; margin-bottom:6px;">Tech Stack <span style="font-weight:400; color:var(--muted);">(comma-separated)</span></label>
-        <input id="postStack" placeholder="React, Node.js, MongoDB" style="width:100%; padding:10px 14px; border-radius:10px; border:1px solid var(--border); background:var(--card); color:var(--text); font-family:'DM Sans',sans-serif; font-size:14px; outline:none;" />
-      </div>
-      <div id="postError" style="color:#ff6b6b; font-size:13px; display:none;"></div>
-      <button onclick="submitProject()" id="postSubmitBtn" class="btn-primary" style="width:100%; padding:12px; border-radius:10px; font-size:15px;">
-        🚀 Post Project
-      </button>
     </div>
   </div>
 </div>
 
+<!-- ONBOARDING PAGE -->
+<div id="page-onboard" class="page">
+  <div class="onboard-bg"></div>
+  <div class="onboard-wrap">
+    <div class="step-indicator">
+      <div class="step-dot active" id="sdot-0"></div>
+      <div class="step-dot" id="sdot-1"></div>
+      <div class="step-dot" id="sdot-2"></div>
+      <div class="step-dot" id="sdot-3"></div>
+      <span class="step-label" id="step-label-text">Step 1 of 4</span>
+    </div>
+    <!-- Step 0 -->
+    <div class="onboard-step active" id="step-0">
+      <div class="onboard-title">Tell us about yourself ✨</div>
+      <div class="onboard-sub">Just the basics — you can always edit these later</div>
+      <div class="two-col" style="margin-bottom:16px;">
+        <div class="form-group"><label>Your Role</label><input id="ob-role" placeholder="e.g. Frontend Dev, ML Engineer…" /></div>
+        <div class="form-group"><label>Year</label>
+          <select id="ob-year">
+            <option value="">Select year</option>
+            <option>1st Year</option><option>2nd Year</option><option>3rd Year</option>
+            <option>4th Year</option><option>Masters</option><option>PhD</option>
+            <option>Bootcamp / Self-taught</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group" style="margin-bottom:16px;"><label>College / University</label><input id="ob-college" placeholder="e.g. MIT, IIT Bombay, TU Berlin…" /></div>
+      <div class="form-group" style="margin-bottom:0;"><label>Short Bio <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted);">(optional)</span></label><textarea id="ob-bio" rows="3" placeholder="What are you passionate about building?"></textarea></div>
+    </div>
+    <!-- Step 1 -->
+    <div class="onboard-step" id="step-1">
+      <div class="onboard-title">What excites you? 🔥</div>
+      <div class="onboard-sub">Pick the domains you want to work in. We use this to rank your matches.</div>
+      <div class="pill-grid" id="interest-grid"></div>
+      <div style="font-size:13px;color:var(--muted);margin-top:8px;">Pick at least 1 — the more you pick, the better your matches</div>
+    </div>
+    <!-- Step 2 -->
+    <div class="onboard-step" id="step-2">
+      <div class="onboard-title">What's in your toolkit? 🛠</div>
+      <div class="onboard-sub">Select your tech skills. We find complementary teammates with different stacks.</div>
+      <div class="pill-grid" id="skills-grid"></div>
+    </div>
+    <!-- Step 3 -->
+    <div class="onboard-step" id="step-3">
+      <div class="onboard-title">How do you want to collaborate? 🤝</div>
+      <div class="onboard-sub">You can change this anytime from your profile.</div>
+      <div style="display:flex;flex-direction:column;gap:16px;margin-bottom:24px;">
+        <div id="mode-partners" class="mode-card selected" onclick="selectMode('partners')">
+          <div style="font-size:28px;margin-bottom:8px;">🔍</div>
+          <div style="font-size:18px;font-weight:700;margin-bottom:6px;">Looking for Partners</div>
+          <div style="font-size:14px;color:var(--muted2);">You have a project idea and need talented teammates</div>
+        </div>
+        <div id="mode-projects" class="mode-card" onclick="selectMode('projects')">
+          <div style="font-size:28px;margin-bottom:8px;">🚀</div>
+          <div style="font-size:18px;font-weight:700;margin-bottom:6px;">Ready to Join Projects</div>
+          <div style="font-size:14px;color:var(--muted2);">You want to contribute skills to an existing idea</div>
+        </div>
+      </div>
+    </div>
+    <div class="onboard-nav">
+      <button class="btn btn-ghost" id="ob-back-btn" onclick="obBack()" style="visibility:hidden;">← Back</button>
+      <button class="btn btn-primary" id="ob-next-btn" onclick="obNext()">Continue →</button>
+    </div>
+  </div>
+</div>
+
+<!-- APP PAGE -->
+<div id="page-app" class="page">
+  <nav class="app-nav">
+    <a class="nav-logo" href="#" onclick="return false;">
+      <div class="nav-logo-icon">🔗</div>
+      <span class="nav-logo-text">Partner<span>Forge</span></span>
+    </a>
+    <div class="nav-tabs">
+      <button class="nav-tab active" onclick="showView('dashboard')">Dashboard</button>
+      <button class="nav-tab" onclick="showView('matches')">Matches</button>
+      <button class="nav-tab" onclick="showView('projects')">Projects</button>
+      <button class="nav-tab" onclick="showView('profile')">Profile</button>
+    </div>
+    <div class="nav-user">
+      <div class="nav-avatar" id="nav-avatar" onclick="showView('profile')">🧑‍💻</div>
+      <span class="nav-name" id="nav-name">—</span>
+      <button class="btn btn-ghost btn-sm" onclick="logout()">Log out</button>
+    </div>
+  </nav>
+  <div class="app-content">
+
+    <!-- DASHBOARD -->
+    <div class="app-view active" id="view-dashboard">
+      <div class="section-wrap">
+        <div class="dash-hero">
+          <div class="dash-hero-text">
+            <h2 id="dash-greeting">Welcome back! 👋</h2>
+            <p id="dash-subtitle">Your profile is live. Explore matches and find projects to join.</p>
+            <div style="display:flex;gap:10px;margin-top:20px;flex-wrap:wrap;">
+              <button class="btn btn-primary btn-sm" onclick="showView('matches')">View Matches →</button>
+              <button class="btn btn-ghost btn-sm" onclick="openPostModal()">+ Post Project</button>
+            </div>
+          </div>
+          <div class="dash-hero-emoji" id="dash-avatar-big">🧑‍💻</div>
+        </div>
+        <div class="stats-row">
+          <div class="stat-card"><div class="stat-num" id="stat-matches">—</div><div class="stat-label">Potential Matches</div></div>
+          <div class="stat-card"><div class="stat-num" id="stat-skills">—</div><div class="stat-label">Skills Listed</div></div>
+          <div class="stat-card"><div class="stat-num" id="stat-interests">—</div><div class="stat-label">Interests</div></div>
+          <div class="stat-card"><div class="stat-num" id="stat-projects">—</div><div class="stat-label">Open Projects</div></div>
+        </div>
+        <div class="two-pane">
+          <div class="panel">
+            <div class="panel-title">🎯 Top Matches</div>
+            <div id="dash-matches-list"><div class="loading-state"><div class="spinner"></div></div></div>
+            <button class="btn btn-ghost btn-sm" style="width:100%;margin-top:16px;" onclick="showView('matches')">See All Matches →</button>
+          </div>
+          <div class="panel">
+            <div class="panel-title">🛠 Your Profile Snapshot</div>
+            <div style="margin-bottom:20px;">
+              <div style="font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;">Skills</div>
+              <div class="chip-list" id="dash-skills"><span style="color:var(--muted);font-size:13px;">No skills yet</span></div>
+            </div>
+            <div>
+              <div style="font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;">Interests</div>
+              <div class="chip-list" id="dash-interests"><span style="color:var(--muted);font-size:13px;">No interests yet</span></div>
+            </div>
+            <button class="btn btn-ghost btn-sm" style="width:100%;margin-top:20px;" onclick="showView('profile')">Edit Profile →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MATCHES -->
+    <div class="app-view" id="view-matches">
+      <div class="section-wrap">
+        <div class="section-eyebrow">People</div>
+        <div class="section-heading">Your Partner Matches</div>
+        <div class="section-sub">Students ranked by how well your skills and interests align. Add more to improve matches.</div>
+        <div class="matches-filter" id="matches-filter-bar">
+          <button class="filter-btn active" onclick="filterMatches(this,'all')">All</button>
+          <button class="filter-btn" onclick="filterMatches(this,'high')">⚡ High Match (70%+)</button>
+          <button class="filter-btn" onclick="filterMatches(this,'shared')">🔥 Shared Interests</button>
+        </div>
+        <div class="matches-grid" id="matches-grid">
+          <div class="loading-state" style="grid-column:1/-1;"><div class="spinner spinner-lg"></div><span>Finding your matches…</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROJECTS -->
+    <div class="app-view" id="view-projects">
+      <div class="section-wrap">
+        <div class="projects-top">
+          <div><div class="section-eyebrow">Discover</div><div class="section-heading">Open Projects</div></div>
+          <button class="btn btn-primary" onclick="openPostModal()">+ Post Project</button>
+        </div>
+        <div class="filter-bar" style="margin-bottom:28px;" id="proj-filter-bar">
+          <span class="filter-label">Filter:</span>
+          <button class="f-chip active" onclick="filterProjects(this,'All','All')">All</button>
+          <button class="f-chip" onclick="filterProjects(this,'React','All')">React</button>
+          <button class="f-chip" onclick="filterProjects(this,'Python','All')">Python</button>
+          <button class="f-chip" onclick="filterProjects(this,'All','AI / ML')">AI / ML</button>
+          <button class="f-chip" onclick="filterProjects(this,'Flutter','All')">Flutter</button>
+          <button class="f-chip" onclick="filterProjects(this,'Node.js','All')">Node.js</button>
+          <button class="f-chip" onclick="filterProjects(this,'TypeScript','All')">TypeScript</button>
+          <button class="f-chip" onclick="filterProjects(this,'All','Open Source')">Open Source</button>
+        </div>
+        <div class="projects-grid" id="projects-grid">
+          <div class="loading-state" style="grid-column:1/-1;"><div class="spinner spinner-lg"></div><span>Loading projects…</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROFILE -->
+    <div class="app-view" id="view-profile">
+      <div class="section-wrap">
+        <div class="section-eyebrow">Account</div>
+        <div class="section-heading">Your Profile</div>
+        <div class="profile-hero">
+          <div class="profile-avatar" id="profile-avatar-display">🧑‍💻</div>
+          <div>
+            <div class="profile-name" id="profile-name-display">—</div>
+            <div class="profile-role" id="profile-role-display">—</div>
+            <div class="profile-college" id="profile-college-display">—</div>
+            <div class="profile-bio" id="profile-bio-display">—</div>
+          </div>
+        </div>
+        <div class="profile-grid">
+          <div class="edit-panel">
+            <h3>Basic Info</h3>
+            <div class="edit-field"><label>Display Name</label><input id="prof-name" placeholder="Your name" /></div>
+            <div class="edit-field"><label>Role / Title</label><input id="prof-role" placeholder="e.g. Frontend Dev" /></div>
+            <div class="edit-field"><label>College</label><input id="prof-college" placeholder="Your university" /></div>
+            <div class="edit-field"><label>Year</label>
+              <select id="prof-year">
+                <option value="">—</option>
+                <option>1st Year</option><option>2nd Year</option><option>3rd Year</option>
+                <option>4th Year</option><option>Masters</option><option>PhD</option>
+                <option>Bootcamp / Self-taught</option>
+              </select>
+            </div>
+            <div class="edit-field"><label>Bio</label><textarea id="prof-bio" rows="3" placeholder="Tell partners about yourself…"></textarea></div>
+            <div class="edit-field"><label>I'm looking to…</label>
+              <select id="prof-lookingfor">
+                <option value="partners">Find partners for my project</option>
+                <option value="projects">Join someone else's project</option>
+              </select>
+            </div>
+            <button class="btn btn-primary btn-full" onclick="saveProfile()">Save Changes</button>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:20px;">
+            <div class="edit-panel">
+              <h3>Skills</h3>
+              <div class="pill-grid" id="prof-skills-grid"></div>
+              <div style="font-size:12px;color:var(--muted);margin-top:8px;">Click to toggle</div>
+            </div>
+            <div class="edit-panel">
+              <h3>Interests</h3>
+              <div class="pill-grid" id="prof-interests-grid"></div>
+              <div style="font-size:12px;color:var(--muted);margin-top:8px;">Click to toggle</div>
+            </div>
+            <button class="btn btn-primary btn-full" onclick="saveSkillsInterests()">Save Skills &amp; Interests</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- POST MODAL -->
+<div class="modal-overlay" id="post-modal" onclick="maybeCloseModal(event)">
+  <div class="modal">
+    <button class="modal-close" onclick="closePostModal()">✕</button>
+    <h3>Post a Project 🚀</h3>
+    <p class="sub">Share your idea and attract teammates</p>
+    <div class="modal-field"><label>Project Title *</label><input id="pm-title" placeholder="e.g. StudyBuddy — AI Tutor App" /></div>
+    <div class="modal-field"><label>Description</label><textarea id="pm-desc" rows="3" placeholder="What are you building? What teammates do you need?"></textarea></div>
+    <div class="modal-field"><label>Tech Stack <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted);">(comma-separated)</span></label><input id="pm-stack" placeholder="React, Node.js, MongoDB" /></div>
+    <div class="two-col" style="margin-bottom:20px;">
+      <div class="modal-field" style="margin-bottom:0;"><label>Difficulty</label>
+        <select id="pm-diff"><option>Beginner</option><option selected>Intermediate</option><option>Advanced</option></select>
+      </div>
+      <div class="modal-field" style="margin-bottom:0;"><label>Duration</label><input id="pm-duration" placeholder="e.g. 4 weeks" /></div>
+    </div>
+    <div class="modal-field"><label>Interest Areas <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted);">(comma-separated)</span></label><input id="pm-interests" placeholder="AI / ML, Web Dev, Open Source" /></div>
+    <div class="modal-error" id="pm-error"></div>
+    <button class="btn btn-primary btn-full" id="pm-submit" onclick="submitProject()">Post Project →</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+
 <script>
-  // ── CONFIG ──
-  // Set this to your deployed Vercel API URL in production, or leave as '' for same-origin
-  const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-    ? 'http://localhost:3000'
-    : '';  // same-origin on Vercel (vercel.json routes everything to api/index.js)
+const API=(window.location.hostname==='localhost'||window.location.hostname==='127.0.0.1')?'http://localhost:3000':'';
+let currentUser=null,allMatches=[],obStep=0,obMode='partners';
+let obSelectedInterests=[],obSelectedSkills=[],profSelectedInterests=[],profSelectedSkills=[];
+const ALL_INTERESTS=[
+  {label:'Web Dev',icon:'🌐'},{label:'AI / ML',icon:'🤖'},{label:'App Dev',icon:'📱'},
+  {label:'Open Source',icon:'🧑‍💻'},{label:'Hackathons',icon:'⚡'},{label:'Blockchain',icon:'🔗'},
+  {label:'Game Dev',icon:'🎮'},{label:'Data Science',icon:'📊'},{label:'Cybersecurity',icon:'🔐'},
+  {label:'DevOps',icon:'🛠'},{label:'UI/UX Design',icon:'🎨'},{label:'Robotics',icon:'🦾'},
+];
+const ALL_SKILLS=[
+  'JavaScript','TypeScript','Python','React','Next.js','Vue','Angular','Node.js','Express',
+  'FastAPI','Django','Flask','Go','Rust','Java','C++','Swift','Flutter','Kotlin','React Native',
+  'MongoDB','PostgreSQL','MySQL','Redis','Firebase','Supabase','AWS','GCP','Azure','Docker',
+  'Kubernetes','TensorFlow','PyTorch','LangChain','OpenAI API','GraphQL','REST API','Figma',
+  'Tailwind','Three.js','WebGL','Solidity','Rust (Web3)',
+];
 
-  // ── SCROLL ANIMATIONS ──
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('visible');
-      }
-    });
-  }, { threshold: 0.1 });
+function showPage(id){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById('page-'+id).classList.add('active');}
+function showView(name){
+  document.querySelectorAll('.app-view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+name).classList.add('active');
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  const tabs=document.querySelectorAll('.nav-tab');
+  const map={dashboard:0,matches:1,projects:2,profile:3};
+  if(map[name]!==undefined)tabs[map[name]].classList.add('active');
+  if(name==='matches')loadMatches();
+  if(name==='projects')loadProjects();
+  if(name==='profile')loadProfileEditor();
+  if(name==='dashboard')loadDashboard();
+}
+function toast(msg,type=''){
+  const el=document.getElementById('toast');
+  el.textContent=msg;el.className='show '+type;
+  setTimeout(()=>{el.className='';},3200);
+}
+async function api(path,opts={}){
+  const res=await fetch(API+path,{headers:{'Content-Type':'application/json'},...opts,body:opts.body?JSON.stringify(opts.body):undefined});
+  const data=await res.json();
+  if(!res.ok)throw new Error(data.error||'Request failed');
+  return data;
+}
+function saveLocal(){if(currentUser)localStorage.setItem('pf_user',JSON.stringify(currentUser));}
+function loadLocal(){const r=localStorage.getItem('pf_user');return r?JSON.parse(r):null;}
 
-  document.querySelectorAll('.fade-in, .stagger').forEach(el => observer.observe(el));
+function switchAuthTab(tab){
+  document.getElementById('auth-signup').style.display=tab==='signup'?'block':'none';
+  document.getElementById('auth-login').style.display=tab==='login'?'block':'none';
+  document.getElementById('tab-signup').className='auth-tab'+(tab==='signup'?' active':'');
+  document.getElementById('tab-login').className='auth-tab'+(tab==='login'?' active':'');
+}
+async function handleSignup(){
+  const name=document.getElementById('signup-name').value.trim();
+  const email=document.getElementById('signup-email').value.trim();
+  const errEl=document.getElementById('signup-error');
+  const btn=document.getElementById('signup-btn');
+  errEl.style.display='none';
+  if(!name||!email){errEl.textContent='Please fill in all fields';errEl.style.display='block';return;}
+  btn.disabled=true;btn.innerHTML='<span class="spinner"></span> Creating…';
+  try{
+    const user=await api('/api/auth/signup',{method:'POST',body:{name,email}});
+    currentUser=user;saveLocal();startOnboarding();
+  }catch(e){
+    errEl.textContent=e.message.includes('already')?'Email already registered — try signing in instead':e.message;
+    errEl.style.display='block';
+  }finally{btn.disabled=false;btn.innerHTML='Create Free Account →';}
+}
+async function handleLogin(){
+  const email=document.getElementById('login-email').value.trim();
+  const errEl=document.getElementById('login-error');
+  const btn=document.getElementById('login-btn');
+  errEl.style.display='none';
+  if(!email){errEl.textContent='Enter your email';errEl.style.display='block';return;}
+  btn.disabled=true;btn.innerHTML='<span class="spinner"></span> Signing in…';
+  try{
+    const user=await api('/api/auth/login',{method:'POST',body:{email}});
+    currentUser=user;saveLocal();enterApp();
+  }catch(e){errEl.textContent=e.message;errEl.style.display='block';}
+  finally{btn.disabled=false;btn.innerHTML='Sign In →';}
+}
+function logout(){currentUser=null;localStorage.removeItem('pf_user');showPage('auth');}
 
-  // ── FILTER CHIPS ──
-  function filterProjects(el, tech) {
-    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
-    el.classList.add('active');
-    loadProjects(tech);
-  }
-
-  // ── INTEREST PILLS ──
-  function toggleInterest(el) {
-    el.classList.toggle('selected');
-  }
-
-  // ── COLLAB MODE TOGGLE ──
-  const modeDescriptions = {
-    looking: "You have a project idea and you're looking for talented teammates to bring it to life. You'll appear in partner discovery feeds.",
-    ready: "You're open to joining existing projects. Ideal if you want to contribute skills without committing to a full idea from scratch."
-  };
-
-  function switchMode(mode) {
-    const desc = document.getElementById('collabDesc');
-    const lookingBtn = document.getElementById('toggleLooking');
-    const readyBtn = document.getElementById('toggleReady');
-    if (mode === 'looking') {
-      lookingBtn.classList.add('active');
-      readyBtn.classList.remove('active');
-    } else {
-      readyBtn.classList.add('active');
-      lookingBtn.classList.remove('active');
-    }
-    desc.style.opacity = '0';
-    setTimeout(() => {
-      desc.textContent = modeDescriptions[mode];
-      desc.style.opacity = '1';
-      desc.style.transition = 'opacity 0.4s';
-    }, 200);
-  }
-
-  // ── JOIN PROJECT ──
-  function joinProject(btn) {
-    const originalText = btn.textContent;
-    btn.textContent = '✓ Joined!';
-    btn.style.background = 'linear-gradient(135deg, #5cf4c4, #00d4aa)';
-    btn.disabled = true;
-    setTimeout(() => {
-      btn.textContent = originalText;
-      btn.style.background = '';
-      btn.disabled = false;
-    }, 2500);
-  }
-
-  function scrollToPost() {
-    document.getElementById('post').scrollIntoView({ behavior: 'smooth' });
-  }
-
-  // ── NAV ACTIVE ──
-  window.addEventListener('scroll', () => {
-    const nav = document.querySelector('nav');
-    nav.style.background = window.scrollY > 50 ? 'rgba(10,10,15,0.95)' : 'rgba(10,10,15,0.8)';
+function startOnboarding(){
+  obStep=0;obSelectedInterests=[];obSelectedSkills=[];obMode='partners';
+  buildInterestGrid();buildSkillsGrid();renderObStep();showPage('onboard');
+}
+function buildInterestGrid(){
+  document.getElementById('interest-grid').innerHTML=ALL_INTERESTS.map((it,i)=>
+    `<div class="interest-pill-pick" id="int-${i}" onclick="toggleInterestPill(this,'${it.label}')"><span style="font-size:16px;">${it.icon}</span>${it.label}</div>`
+  ).join('');
+}
+function buildSkillsGrid(){
+  document.getElementById('skills-grid').innerHTML=ALL_SKILLS.map((s,i)=>
+    `<div class="skill-pill-pick" id="sk-${i}" onclick="toggleSkillPill(this,'${s}')">${s}</div>`
+  ).join('');
+}
+function toggleInterestPill(el,label){
+  el.classList.toggle('selected');
+  const idx=obSelectedInterests.indexOf(label);
+  if(idx===-1)obSelectedInterests.push(label);else obSelectedInterests.splice(idx,1);
+}
+function toggleSkillPill(el,skill){
+  el.classList.toggle('selected');
+  const idx=obSelectedSkills.indexOf(skill);
+  if(idx===-1)obSelectedSkills.push(skill);else obSelectedSkills.splice(idx,1);
+}
+function selectMode(mode){
+  obMode=mode;
+  document.querySelectorAll('.mode-card').forEach(c=>c.classList.remove('selected'));
+  document.getElementById('mode-'+mode).classList.add('selected');
+}
+function renderObStep(){
+  document.querySelectorAll('.onboard-step').forEach((s,i)=>s.classList.toggle('active',i===obStep));
+  document.querySelectorAll('.step-dot').forEach((d,i)=>{
+    d.classList.remove('active','done');
+    if(i<obStep)d.classList.add('done');
+    if(i===obStep)d.classList.add('active');
   });
+  document.getElementById('step-label-text').textContent=`Step ${obStep+1} of 4`;
+  document.getElementById('ob-back-btn').style.visibility=obStep===0?'hidden':'visible';
+  document.getElementById('ob-next-btn').textContent=obStep===3?"Let's go! 🚀":'Continue →';
+}
+function obBack(){if(obStep>0){obStep--;renderObStep();}}
+async function obNext(){
+  if(obStep===3){await finishOnboarding();return;}
+  obStep++;renderObStep();
+}
+async function finishOnboarding(){
+  const btn=document.getElementById('ob-next-btn');
+  btn.disabled=true;btn.innerHTML='<span class="spinner"></span>';
+  try{
+    const u=await api(`/api/users/${currentUser.id}`,{method:'PATCH',body:{
+      role:document.getElementById('ob-role').value.trim(),
+      college:document.getElementById('ob-college').value.trim(),
+      year:document.getElementById('ob-year').value,
+      bio:document.getElementById('ob-bio').value.trim(),
+      interests:obSelectedInterests,skills:obSelectedSkills,lookingFor:obMode,
+    }});
+    currentUser=u;saveLocal();enterApp();
+  }catch(e){toast('Failed to save: '+e.message,'error');}
+  finally{btn.disabled=false;btn.innerHTML="Let's go! 🚀";}
+}
+function enterApp(){
+  document.getElementById('nav-avatar').textContent=currentUser.avatar||'🧑‍💻';
+  document.getElementById('nav-name').textContent=currentUser.name.split(' ')[0];
+  showPage('app');showView('dashboard');
+}
 
-  // ── ANIMATE PROGRESS BARS ON SCROLL ──
-  const progressObserver = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.querySelectorAll('.progress-fill').forEach(bar => {
-          const width = bar.style.width;
-          bar.style.width = '0';
-          requestAnimationFrame(() => {
-            setTimeout(() => {
-              bar.style.transition = 'width 1.2s ease';
-              bar.style.width = width;
-            }, 200);
-          });
-        });
-      }
-    });
-  }, { threshold: 0.3 });
+async function loadDashboard(){
+  if(!currentUser)return;
+  document.getElementById('dash-greeting').textContent=`Welcome back, ${currentUser.name.split(' ')[0]}! 👋`;
+  document.getElementById('dash-avatar-big').textContent=currentUser.avatar||'🧑‍💻';
+  const skillsEl=document.getElementById('dash-skills');
+  const intEl=document.getElementById('dash-interests');
+  skillsEl.innerHTML=(currentUser.skills||[]).length?(currentUser.skills||[]).map(s=>`<span class="chip chip-teal">${s}</span>`).join(''):'<span style="color:var(--muted);font-size:13px;">No skills yet</span>';
+  intEl.innerHTML=(currentUser.interests||[]).length?(currentUser.interests||[]).map(i=>`<span class="chip chip-accent">${i}</span>`).join(''):'<span style="color:var(--muted);font-size:13px;">No interests yet</span>';
+  document.getElementById('stat-skills').textContent=(currentUser.skills||[]).length;
+  document.getElementById('stat-interests').textContent=(currentUser.interests||[]).length;
+  try{
+    const matches=await api(`/api/users/${currentUser.id}/matches`);
+    allMatches=matches;
+    document.getElementById('stat-matches').textContent=matches.length;
+    renderDashMatches(matches.slice(0,4));
+  }catch(e){document.getElementById('stat-matches').textContent='—';}
+  try{
+    const projs=await api('/api/projects');
+    document.getElementById('stat-projects').textContent=projs.length;
+  }catch(e){document.getElementById('stat-projects').textContent='—';}
+}
+function renderDashMatches(matches){
+  const el=document.getElementById('dash-matches-list');
+  if(!matches.length){el.innerHTML='<div style="color:var(--muted);font-size:14px;padding:16px 0;">No matches yet — add more skills and interests!</div>';return;}
+  el.innerHTML=matches.map(m=>{
+    const pct=m.matchPercentage||0;
+    const col=pct>=70?'var(--teal)':pct>=50?'#b099ff':'var(--yellow)';
+    return `<div class="match-preview-item">
+      <div class="mp-avatar">${m.avatar||'🧑‍💻'}</div>
+      <div class="mp-info"><div class="mp-name">${m.name}</div><div class="mp-role">${m.role||m.college||'—'}</div></div>
+      <div class="mp-pct" style="color:${col};background:${col}1a;border:1px solid ${col}33;">${pct}%</div>
+    </div>`;
+  }).join('');
+}
 
-  document.querySelectorAll('.readiness-card').forEach(card => progressObserver.observe(card));
-
-  // ── API: LOAD PROJECTS ──
-  async function loadProjects(tech = 'All') {
-    const grid = document.getElementById('projectsGrid');
-    const loading = document.getElementById('projectsLoading');
-    grid.style.display = 'none';
-    loading.style.display = 'flex';
-
-    try {
-      const url = tech === 'All'
-        ? `${API_BASE}/api/projects`
-        : `${API_BASE}/api/projects?tech=${encodeURIComponent(tech)}`;
-      const res = await fetch(url);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const projects = await res.json();
-
-      if (!projects.length) {
-        grid.innerHTML = `<div style="color:var(--muted); font-size:15px; padding:40px 0; grid-column:1/-1; text-align:center;">No projects found for this filter.</div>`;
-      } else {
-        grid.innerHTML = projects.map(renderProjectCard).join('');
-      }
-      loading.style.display = 'none';
-      grid.style.display = 'grid';
-    } catch (err) {
-      loading.innerHTML = `<span style="color:#ff6b6b;">⚠ Could not load projects. Is the API running?<br><small>${err.message}</small></span>`;
-    }
+let matchFilterType='all';
+async function loadMatches(){
+  if(!currentUser)return;
+  document.getElementById('matches-grid').innerHTML='<div class="loading-state" style="grid-column:1/-1;"><div class="spinner spinner-lg"></div><span>Finding your matches…</span></div>';
+  try{
+    const matches=await api(`/api/users/${currentUser.id}/matches`);
+    allMatches=matches;renderMatches(matches);
+  }catch(e){
+    document.getElementById('matches-grid').innerHTML=`<div class="empty-state"><div class="empty-icon">⚠️</div><h3>Could not load matches</h3><p>${e.message}</p></div>`;
   }
-
-  const BADGE_TYPES = {
-    ai: 'badge-ai', ml: 'badge-ai', llm: 'badge-ai',
-    web: 'badge-web', react: 'badge-web', next: 'badge-web',
-    flutter: 'badge-app', swift: 'badge-app', app: 'badge-app',
-    open: 'badge-open', blockchain: 'badge-open',
-  };
-
-  function getBadgeClass(stack = []) {
-    for (const s of stack) {
-      const key = s.toLowerCase();
-      for (const [kw, cls] of Object.entries(BADGE_TYPES)) {
-        if (key.includes(kw)) return cls;
-      }
-    }
-    return 'badge-web';
+}
+function filterMatches(btn,type){
+  matchFilterType=type;
+  document.querySelectorAll('#matches-filter-bar .filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  let f=allMatches;
+  if(type==='high')f=allMatches.filter(m=>(m.matchPercentage||0)>=70);
+  if(type==='shared')f=allMatches.filter(m=>(m.sharedInterests||[]).length>0);
+  renderMatches(f);
+}
+function renderMatches(matches){
+  const grid=document.getElementById('matches-grid');
+  if(!matches.length){
+    grid.innerHTML=`<div class="empty-state" style="grid-column:1/-1;"><div class="empty-icon">🔍</div><h3>No matches found</h3><p>Add more skills and interests to improve your matches</p></div>`;
+    return;
   }
+  grid.innerHTML=matches.map(m=>{
+    const pct=m.matchPercentage||0;
+    const cls=pct>=70?'pct-high':pct>=50?'pct-mid':'pct-low';
+    const shared=(m.sharedInterests||[]).slice(0,3);
+    const skills=(m.skills||[]).slice(0,5);
+    return `<div class="match-card">
+      <div class="mc-avatar-wrap"><div class="mc-avatar">${m.avatar||'🧑‍💻'}</div><div class="mc-online"></div></div>
+      <div class="mc-name">${m.name}</div>
+      <div class="mc-role">${m.role||'Student'}</div>
+      <div class="mc-college">${[m.year,m.college].filter(Boolean).join(' · ')||'—'}</div>
+      <div class="mc-match-pct ${cls}"><span>⚡</span> ${pct}% match</div>
+      ${shared.length?`<div class="mc-shared-label">Shared interests</div>
+        <div class="mc-skills" style="margin-bottom:10px;">${shared.map(i=>`<span class="mc-skill-chip" style="border-color:rgba(108,71,255,.3);color:#b099ff;">${i}</span>`).join('')}</div>`:''}
+      ${skills.length?`<div class="mc-shared-label">Skills</div>
+        <div class="mc-skills">${skills.map(s=>`<span class="mc-skill-chip">${s}</span>`).join('')}</div>`:''}
+      <div class="mc-actions">
+        <button class="btn-connect" onclick="handleConnect(this,'${m.name.replace("'","\\'")}')">✉ Invite</button>
+        <button class="btn-save-m" onclick="this.textContent='🏷️'">🔖</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+function handleConnect(btn,name){
+  btn.textContent='✓ Invited!';btn.style.background='linear-gradient(135deg,var(--teal),#00c4a0)';btn.disabled=true;
+  toast(`Invite sent to ${name}!`,'success');
+  setTimeout(()=>{btn.textContent='✉ Invite';btn.style.background='';btn.disabled=false;},3000);
+}
 
-  function getBadgeLabel(stack = []) {
-    const lower = stack.map(s => s.toLowerCase());
-    if (lower.some(s => s.includes('ai') || s.includes('llm') || s.includes('ml'))) return 'AI / ML';
-    if (lower.some(s => s.includes('flutter') || s.includes('swift'))) return 'App Dev';
-    if (lower.some(s => s.includes('blockchain'))) return 'Open Source';
-    return 'Web Dev';
+let currentTech='All',currentInterest='All';
+async function loadProjects(){
+  document.getElementById('projects-grid').innerHTML='<div class="loading-state" style="grid-column:1/-1;"><div class="spinner spinner-lg"></div><span>Loading projects…</span></div>';
+  try{
+    const params=new URLSearchParams();
+    if(currentTech!=='All')params.set('tech',currentTech);
+    if(currentInterest!=='All')params.set('interest',currentInterest);
+    const projects=await api('/api/projects?'+params.toString());
+    renderProjects(projects);
+  }catch(e){
+    document.getElementById('projects-grid').innerHTML=`<div class="empty-state" style="grid-column:1/-1;"><div class="empty-icon">⚠️</div><h3>Could not load projects</h3><p>${e.message}</p></div>`;
   }
-
-  function renderProjectCard(p) {
-    const stackChips = (p.stack || []).map(s => `<span class="stack-chip">${s}</span>`).join('');
-    const dots = (p.diffDots || ['#7c5cfc','var(--border)','var(--border)'])
-      .map(color => `<span class="diff-dot" style="background:${color}"></span>`).join('');
-    const badgeClass = getBadgeClass(p.stack);
-    const badgeLabel = getBadgeLabel(p.stack);
-    return `
-      <div class="project-card">
-        <div class="project-header">
-          <span class="project-badge ${badgeClass}">${badgeLabel}</span>
-          <button class="project-bookmark" onclick="this.textContent = this.textContent === '🔖' ? '🏷️' : '🔖'">🔖</button>
+}
+function filterProjects(btn,tech,interest){
+  currentTech=tech;currentInterest=interest;
+  document.querySelectorAll('#proj-filter-bar .f-chip').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');loadProjects();
+}
+function getTag(interests,stack){
+  const all=[...(interests||[]),...(stack||[])].map(s=>s.toLowerCase()).join(' ');
+  if(all.includes('ai')||all.includes('ml')||all.includes('llm'))return['tag-ai','AI / ML'];
+  if(all.includes('flutter')||all.includes('swift')||all.includes('app'))return['tag-app','App Dev'];
+  if(all.includes('open source'))return['tag-open','Open Source'];
+  return['tag-web','Web Dev'];
+}
+function getDiffDots(diff){
+  const d=(diff||'').toLowerCase();
+  const filled=d.includes('adv')?3:d.includes('inter')?2:1;
+  const cols=['#6c47ff','#ff4d8d','var(--teal)'];
+  return Array(3).fill(0).map((_,i)=>`<div class="pc-dot" style="background:${i<filled?cols[Math.min(filled-1,2)]:'var(--border2)'}"></div>`).join('');
+}
+function renderProjects(projects){
+  const grid=document.getElementById('projects-grid');
+  if(!projects.length){
+    grid.innerHTML=`<div class="empty-state" style="grid-column:1/-1;"><div class="empty-icon">📂</div><h3>No projects yet</h3><p>Be the first to post one!</p></div>`;
+    return;
+  }
+  grid.innerHTML=projects.map(p=>{
+    const[tagClass,tagLabel]=getTag(p.interests,p.stack);
+    return `<div class="project-card">
+      <div class="pc-top"><span class="pc-tag ${tagClass}">${tagLabel}</span><div class="pc-diff">${getDiffDots(p.difficulty)}</div></div>
+      <div class="pc-body">
+        <div class="pc-title">${p.title}</div>
+        <div class="pc-desc">${p.description||''}</div>
+        <div class="pc-stack">${(p.stack||[]).map(s=>`<span class="pc-chip">${s}</span>`).join('')}</div>
+        <div class="pc-meta"><span>👥 ${p.membersCount||1}/${p.teamSize||4}</span><span>⏱ ${p.duration||'—'}</span><span>📈 ${p.difficulty||'Intermediate'}</span></div>
+      </div>
+      <div class="pc-foot">
+        <div class="pc-author">
+          <div class="pc-avatar">🧑</div>
+          <div><div class="pc-author-name">${p.authorName||'Anonymous'}</div><div class="pc-author-col">${p.authorCollege||''}</div></div>
         </div>
-        <div class="project-body">
-          <h3 class="project-title">${p.title}</h3>
-          <p class="project-desc">${p.description || ''}</p>
-          <div class="stack-chips">${stackChips}</div>
-          <div class="project-meta">
-            <span class="meta-item">⚡ Difficulty: <span class="difficulty">${dots}</span></span>
-          </div>
-        </div>
-        <div class="project-footer">
-          <div class="project-author">
-            <div class="author-avatar" style="background: linear-gradient(135deg, var(--accent), var(--accent2));">🧑</div>
-          </div>
-          <div class="project-actions">
-            <button class="btn-join" onclick="joinProject(this)">Join →</button>
-          </div>
-        </div>
-      </div>`;
-  }
+        <button class="btn-join-p" onclick="joinProject(this)">Join →</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+function joinProject(btn){
+  btn.textContent='✓ Joined!';btn.style.background='linear-gradient(135deg,var(--teal),#00c4a0)';btn.disabled=true;
+  toast('Request sent!','success');
+  setTimeout(()=>{btn.textContent='Join →';btn.style.background='';btn.disabled=false;},2500);
+}
+function openPostModal(){document.getElementById('post-modal').classList.add('open');document.body.style.overflow='hidden';}
+function closePostModal(){document.getElementById('post-modal').classList.remove('open');document.body.style.overflow='';}
+function maybeCloseModal(e){if(e.target===document.getElementById('post-modal'))closePostModal();}
+async function submitProject(){
+  const title=document.getElementById('pm-title').value.trim();
+  const desc=document.getElementById('pm-desc').value.trim();
+  const stackRaw=document.getElementById('pm-stack').value.trim();
+  const intRaw=document.getElementById('pm-interests').value.trim();
+  const diff=document.getElementById('pm-diff').value;
+  const duration=document.getElementById('pm-duration').value.trim();
+  const errEl=document.getElementById('pm-error');
+  const btn=document.getElementById('pm-submit');
+  errEl.style.display='none';
+  if(!title){errEl.textContent='Title is required';errEl.style.display='block';return;}
+  btn.disabled=true;btn.innerHTML='<span class="spinner"></span> Posting…';
+  try{
+    await api('/api/projects',{method:'POST',body:{
+      title,description:desc,
+      stack:stackRaw?stackRaw.split(',').map(s=>s.trim()).filter(Boolean):[],
+      interests:intRaw?intRaw.split(',').map(s=>s.trim()).filter(Boolean):[],
+      difficulty:diff,duration:duration||'4 weeks',authorId:currentUser?.id,
+    }});
+    toast('Project posted!','success');closePostModal();
+    ['pm-title','pm-desc','pm-stack','pm-interests','pm-duration'].forEach(id=>document.getElementById(id).value='');
+    if(document.getElementById('view-projects').classList.contains('active'))loadProjects();
+  }catch(e){errEl.textContent=e.message;errEl.style.display='block';}
+  finally{btn.disabled=false;btn.innerHTML='Post Project →';}
+}
 
-  // ── POST PROJECT MODAL ──
-  function openPostModal() {
-    const modal = document.getElementById('postModal');
-    modal.style.display = 'flex';
-    document.body.style.overflow = 'hidden';
-  }
+function loadProfileEditor(){
+  if(!currentUser)return;
+  const u=currentUser;
+  document.getElementById('profile-avatar-display').textContent=u.avatar||'🧑‍💻';
+  document.getElementById('profile-name-display').textContent=u.name||'—';
+  document.getElementById('profile-role-display').textContent=u.role||'—';
+  document.getElementById('profile-college-display').textContent=[u.year,u.college].filter(Boolean).join(' · ')||'—';
+  document.getElementById('profile-bio-display').textContent=u.bio||'—';
+  document.getElementById('prof-name').value=u.name||'';
+  document.getElementById('prof-role').value=u.role||'';
+  document.getElementById('prof-college').value=u.college||'';
+  document.getElementById('prof-bio').value=u.bio||'';
+  document.getElementById('prof-year').value=u.year||'';
+  document.getElementById('prof-lookingfor').value=u.lookingFor||'partners';
+  profSelectedSkills=[...(u.skills||[])];
+  profSelectedInterests=[...(u.interests||[])];
+  buildProfSkillsGrid();buildProfInterestsGrid();
+}
+function buildProfSkillsGrid(){
+  document.getElementById('prof-skills-grid').innerHTML=ALL_SKILLS.map((s,i)=>{
+    const sel=profSelectedSkills.includes(s);
+    return `<div class="skill-pill-pick${sel?' selected':''}" onclick="toggleProfSkill(this,'${s}')">${s}</div>`;
+  }).join('');
+}
+function buildProfInterestsGrid(){
+  document.getElementById('prof-interests-grid').innerHTML=ALL_INTERESTS.map((it,i)=>{
+    const sel=profSelectedInterests.includes(it.label);
+    return `<div class="interest-pill-pick${sel?' selected':''}" onclick="toggleProfInterest(this,'${it.label}')"><span style="font-size:16px;">${it.icon}</span>${it.label}</div>`;
+  }).join('');
+}
+function toggleProfSkill(el,skill){
+  el.classList.toggle('selected');
+  const idx=profSelectedSkills.indexOf(skill);
+  if(idx===-1)profSelectedSkills.push(skill);else profSelectedSkills.splice(idx,1);
+}
+function toggleProfInterest(el,label){
+  el.classList.toggle('selected');
+  const idx=profSelectedInterests.indexOf(label);
+  if(idx===-1)profSelectedInterests.push(label);else profSelectedInterests.splice(idx,1);
+}
+async function saveProfile(){
+  try{
+    const u=await api(`/api/users/${currentUser.id}`,{method:'PATCH',body:{
+      name:document.getElementById('prof-name').value.trim(),
+      role:document.getElementById('prof-role').value.trim(),
+      college:document.getElementById('prof-college').value.trim(),
+      bio:document.getElementById('prof-bio').value.trim(),
+      year:document.getElementById('prof-year').value,
+      lookingFor:document.getElementById('prof-lookingfor').value,
+    }});
+    currentUser=u;saveLocal();loadProfileEditor();
+    document.getElementById('nav-avatar').textContent=u.avatar||'🧑‍💻';
+    document.getElementById('nav-name').textContent=u.name.split(' ')[0];
+    toast('Profile saved!','success');
+  }catch(e){toast('Save failed: '+e.message,'error');}
+}
+async function saveSkillsInterests(){
+  try{
+    const u=await api(`/api/users/${currentUser.id}`,{method:'PATCH',body:{skills:profSelectedSkills,interests:profSelectedInterests}});
+    currentUser=u;saveLocal();toast('Skills & interests saved!','success');
+  }catch(e){toast('Save failed: '+e.message,'error');}
+}
 
-  function closePostModal() {
-    const modal = document.getElementById('postModal');
-    modal.style.display = 'none';
-    document.body.style.overflow = '';
-    document.getElementById('postTitle').value = '';
-    document.getElementById('postDesc').value = '';
-    document.getElementById('postStack').value = '';
-    document.getElementById('postError').style.display = 'none';
-  }
-
-  document.getElementById('postModal').addEventListener('click', function(e) {
-    if (e.target === this) closePostModal();
-  });
-
-  async function submitProject() {
-    const title = document.getElementById('postTitle').value.trim();
-    const description = document.getElementById('postDesc').value.trim();
-    const stackRaw = document.getElementById('postStack').value.trim();
-    const errorEl = document.getElementById('postError');
-    const btn = document.getElementById('postSubmitBtn');
-
-    if (!title) {
-      errorEl.textContent = 'Project title is required.';
-      errorEl.style.display = 'block';
-      return;
-    }
-    errorEl.style.display = 'none';
-
-    const stack = stackRaw ? stackRaw.split(',').map(s => s.trim()).filter(Boolean) : [];
-
-    btn.textContent = 'Posting…';
-    btn.disabled = true;
-
-    try {
-      const res = await fetch(`${API_BASE}/api/projects`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, description, stack })
-      });
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error || `HTTP ${res.status}`);
-      }
-      closePostModal();
-      loadProjects('All');
-      // Reset filter to All
-      document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
-      document.querySelector('.filter-chip').classList.add('active');
-    } catch (err) {
-      errorEl.textContent = `Failed to post: ${err.message}`;
-      errorEl.style.display = 'block';
-    } finally {
-      btn.textContent = '🚀 Post Project';
-      btn.disabled = false;
-    }
-  }
-
-  // ── WIRE "Post Your Project" BUTTONS ──
-  document.querySelectorAll('a[href="#"]').forEach(a => {
-    if (a.textContent.trim().toLowerCase().includes('post your project')) {
-      a.removeAttribute('href');
-      a.style.cursor = 'pointer';
-      a.addEventListener('click', openPostModal);
-    }
-  });
-
-  // ── INITIAL LOAD ──
-  loadProjects();
-
+(function init(){
+  const saved=loadLocal();
+  if(saved){currentUser=saved;enterApp();}
+  document.getElementById('signup-email').addEventListener('keydown',e=>{if(e.key==='Enter')handleSignup();});
+  document.getElementById('signup-name').addEventListener('keydown',e=>{if(e.key==='Enter')handleSignup();});
+  document.getElementById('login-email').addEventListener('keydown',e=>{if(e.key==='Enter')handleLogin();});
+})();
 </script>
 </body>
 </html>

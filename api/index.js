@@ -1,4 +1,3 @@
-// Only load .env locally — Vercel injects env vars automatically
 if (process.env.NODE_ENV !== "production") {
   require("dotenv").config();
 }
@@ -11,167 +10,177 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// ─────────────────────────────────────────────
-// 1. CACHED DATABASE CONNECTION
-//    Vercel spins up a new function instance on each cold start.
-//    Without caching, every request opens a new MongoDB connection
-//    and you'll quickly hit Atlas's connection limit.
-// ─────────────────────────────────────────────
-let cachedConnection = null;
-
+// ── CACHED DB CONNECTION ──────────────────────────────────────────────────────
+let cachedConn = null;
 async function connectDB() {
-  if (cachedConnection && mongoose.connection.readyState === 1) {
-    return cachedConnection;
-  }
-  cachedConnection = await mongoose.connect(process.env.MONGODB_URI, {
-    // These options prevent connection pool exhaustion in serverless
+  if (cachedConn && mongoose.connection.readyState === 1) return cachedConn;
+  cachedConn = await mongoose.connect(process.env.MONGODB_URI, {
     maxPoolSize: 10,
     serverSelectionTimeoutMS: 5000,
     socketTimeoutMS: 45000,
   });
-  console.log("MongoDB Connected");
-  return cachedConnection;
+  return cachedConn;
 }
 
-// ─────────────────────────────────────────────
-// 2. SCHEMAS & MODELS
-// ─────────────────────────────────────────────
-const projectSchema = new mongoose.Schema({
-  title: { type: String, required: true },
-  description: String,
-  stack: [String],
-  diffDots: {
-    type: [String],
-    default: ["#7c5cfc", "#2a2a3d", "#2a2a3d"],
+// ── SCHEMAS ───────────────────────────────────────────────────────────────────
+const userSchema = new mongoose.Schema(
+  {
+    name: { type: String, required: true, trim: true },
+    email: { type: String, required: true, unique: true, lowercase: true, trim: true },
+    role: { type: String, default: "" },
+    college: { type: String, default: "" },
+    year: { type: String, default: "" },
+    bio: { type: String, default: "" },
+    skills: { type: [String], default: [] },
+    interests: { type: [String], default: [] },
+    avatar: { type: String, default: "🧑‍💻" },
+    lookingFor: { type: String, default: "partners" },
   },
-});
-
-// Clean output: expose `id` as a plain string, drop `__v` and raw `_id`
-projectSchema.set("toJSON", {
-  virtuals: true,
-  versionKey: false,
-  transform: (_doc, ret) => {
-    ret.id = ret._id.toString();
-    delete ret._id;
-  },
-});
-
-const userSchema = new mongoose.Schema({
-  name: String,
-  role: String,
-  skills: [String],
-  college: String,
-});
+  { timestamps: true }
+);
 
 userSchema.set("toJSON", {
-  virtuals: true,
-  versionKey: false,
-  transform: (_doc, ret) => {
-    ret.id = ret._id.toString();
-    delete ret._id;
+  virtuals: true, versionKey: false,
+  transform: (_, ret) => { ret.id = ret._id.toString(); delete ret._id; },
+});
+
+const projectSchema = new mongoose.Schema(
+  {
+    title: { type: String, required: true },
+    description: { type: String, default: "" },
+    stack: { type: [String], default: [] },
+    interests: { type: [String], default: [] },
+    difficulty: { type: String, default: "Intermediate" },
+    teamSize: { type: Number, default: 4 },
+    membersCount: { type: Number, default: 1 },
+    duration: { type: String, default: "4 weeks" },
+    author: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    authorName: { type: String, default: "" },
+    authorCollege: { type: String, default: "" },
   },
+  { timestamps: true }
+);
+
+projectSchema.set("toJSON", {
+  virtuals: true, versionKey: false,
+  transform: (_, ret) => { ret.id = ret._id.toString(); delete ret._id; },
 });
 
-// Prevent model re-compilation on hot reloads (common Vercel/Next error)
-const Project =
-  mongoose.models.Project || mongoose.model("Project", projectSchema);
-const User = mongoose.models.User || mongoose.model("User", userSchema);
+const User    = mongoose.models.User    || mongoose.model("User",    userSchema);
+const Project = mongoose.models.Project || mongoose.model("Project", projectSchema);
 
-// ─────────────────────────────────────────────
-// 3. MIDDLEWARE: connect DB before every request
-// ─────────────────────────────────────────────
-app.use(async (_req, _res, next) => {
+// ── CONNECT MIDDLEWARE ────────────────────────────────────────────────────────
+app.use(async (req, res, next) => {
+  try { await connectDB(); next(); }
+  catch (err) { res.status(503).json({ error: "Database unavailable" }); }
+});
+
+// ── AUTH ──────────────────────────────────────────────────────────────────────
+app.post("/api/auth/signup", async (req, res) => {
   try {
-    await connectDB();
-    next();
+    const { name, email } = req.body;
+    if (!name || !email) return res.status(400).json({ error: "name and email required" });
+    const existing = await User.findOne({ email });
+    if (existing) return res.status(409).json({ error: "Email already registered", user: existing });
+    const AVATARS = ["🧑‍💻","👩‍💻","🧑‍🔬","👩‍🔬","🧑‍🎨","👨‍🎨","🧑‍🚀","👩‍🚀","🧑‍🏫","👩‍🏫"];
+    const avatar = AVATARS[Math.floor(Math.random() * AVATARS.length)];
+    const user = await User.create({ name, email, avatar });
+    res.status(201).json(user);
   } catch (err) {
-    next(err);
+    if (err.code === 11000) return res.status(409).json({ error: "Email already registered" });
+    res.status(500).json({ error: err.message });
   }
 });
 
-// ─────────────────────────────────────────────
-// 4. ROUTES
-// ─────────────────────────────────────────────
+app.post("/api/auth/login", async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ error: "email required" });
+    const user = await User.findOne({ email });
+    if (!user) return res.status(404).json({ error: "No account found with that email" });
+    res.json(user);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
 
-// GET /api/projects?tech=React
+// ── USERS ─────────────────────────────────────────────────────────────────────
+app.get("/api/users/:id", async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ error: "User not found" });
+    res.json(user);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.patch("/api/users/:id", async (req, res) => {
+  try {
+    const allowed = ["name","role","college","year","bio","skills","interests","avatar","lookingFor"];
+    const updates = {};
+    for (const key of allowed) if (req.body[key] !== undefined) updates[key] = req.body[key];
+    const user = await User.findByIdAndUpdate(req.params.id, updates, { new: true });
+    if (!user) return res.status(404).json({ error: "User not found" });
+    res.json(user);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.get("/api/users/:id/matches", async (req, res) => {
+  try {
+    const me = await User.findById(req.params.id);
+    if (!me) return res.status(404).json({ error: "User not found" });
+    const others = await User.find({ _id: { $ne: me._id } });
+    const mySkillSet = new Set(me.skills);
+    const scored = others.map((u) => {
+      let score = 0;
+      const sharedInterests = me.interests.filter(i => u.interests.includes(i));
+      score += sharedInterests.length * 20;
+      const complementary = u.skills.filter(s => !mySkillSet.has(s));
+      score += Math.min(complementary.length * 8, 40);
+      const overlap = u.skills.filter(s => mySkillSet.has(s));
+      score += Math.min(overlap.length * 5, 20);
+      if (me.college && u.college && me.college === u.college) score += 10;
+      return { ...u.toJSON(), matchPercentage: Math.min(score, 99), sharedInterests };
+    });
+    scored.sort((a, b) => b.matchPercentage - a.matchPercentage);
+    res.json(scored);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ── PROJECTS ──────────────────────────────────────────────────────────────────
 app.get("/api/projects", async (req, res) => {
-  const { tech } = req.query;
   try {
-    let projects = await Project.find().lean();
-    if (tech && tech !== "All") {
-      const needle = tech.toLowerCase();
-      projects = projects.filter((p) =>
-        p.stack.some(
-          (s) =>
-            s.toLowerCase().includes(needle) ||
-            (needle === "ai / llm" && s.toLowerCase().includes("ai"))
-        )
-      );
-    }
+    const { tech, interest } = req.query;
+    let projects = await Project.find().sort({ createdAt: -1 }).lean();
+    if (tech && tech !== "All")
+      projects = projects.filter(p => p.stack.some(s => s.toLowerCase().includes(tech.toLowerCase())));
+    if (interest && interest !== "All")
+      projects = projects.filter(p => p.interests.some(i => i.toLowerCase().includes(interest.toLowerCase())));
     res.json(projects);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Failed to fetch projects" });
-  }
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// POST /api/projects
 app.post("/api/projects", async (req, res) => {
   try {
-    const { title, description, stack, diffDots } = req.body;
-    if (!title) return res.status(400).json({ error: "title is required" });
-
-    const project = await Project.create({ title, description, stack, diffDots });
+    const { title, description, stack, interests, difficulty, teamSize, duration, authorId } = req.body;
+    if (!title) return res.status(400).json({ error: "title required" });
+    let authorName = "", authorCollege = "";
+    if (authorId) {
+      const author = await User.findById(authorId);
+      if (author) { authorName = author.name; authorCollege = author.college; }
+    }
+    const project = await Project.create({
+      title, description: description || "", stack: stack || [],
+      interests: interests || [], difficulty: difficulty || "Intermediate",
+      teamSize: teamSize || 4, duration: duration || "4 weeks",
+      author: authorId || null, authorName, authorCollege,
+    });
     res.status(201).json(project);
-  } catch (err) {
-    console.error(err);
-    res.status(400).json({ error: "Failed to create project", details: err.message });
-  }
+  } catch (err) { res.status(400).json({ error: err.message }); }
 });
 
-// GET /api/users
-app.get("/api/users", async (req, res) => {
-  try {
-    const users = await User.find().lean();
-    res.json(users);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Failed to fetch users" });
-  }
-});
+app.use((err, _req, res, _next) => { res.status(500).json({ error: "Internal server error" }); });
 
-// POST /api/users/match  body: { mySkills: string[], projectId: string }
-app.post("/api/users/match", async (req, res) => {
-  const { mySkills, projectId } = req.body;
-  if (!mySkills || !projectId) {
-    return res.status(400).json({ error: "mySkills and projectId are required" });
-  }
-  try {
-    const project = await Project.findById(projectId);
-    if (!project) return res.status(404).json({ error: "Project not found" });
-
-    const commonSkills = project.stack.filter((s) => mySkills.includes(s));
-    const matchPercentage = Math.min(50 + commonSkills.length * 15, 99);
-
-    res.json({ matchPercentage, commonSkills, project });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Match calculation failed" });
-  }
-});
-
-// ─────────────────────────────────────────────
-// 5. GLOBAL ERROR HANDLER
-// ─────────────────────────────────────────────
-app.use((err, _req, res, _next) => {
-  console.error("Unhandled error:", err);
-  res.status(500).json({ error: "Internal server error" });
-});
-
-// Vercel needs a default export; local dev can still `node api/index.js`
 module.exports = app;
 
 if (require.main === module) {
   const PORT = process.env.PORT || 3000;
-  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+  app.listen(PORT, () => console.log(`Running on :${PORT}`));
 }
