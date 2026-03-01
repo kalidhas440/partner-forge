@@ -1,0 +1,2004 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Project Partner Finder — For Students</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #12121a;
+    --surface2: #1a1a26;
+    --border: #2a2a3d;
+    --accent: #7c5cfc;
+    --accent2: #fc5c7d;
+    --accent3: #5cf4c4;
+    --text: #f0f0f8;
+    --muted: #7a7a9a;
+    --card: #161622;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    overflow-x: hidden;
+    cursor: default;
+  }
+
+  h1, h2, h3, h4, .logo-text { font-family: 'Syne', sans-serif; }
+
+  /* ── NOISE TEXTURE ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 999;
+    opacity: 0.5;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 48px;
+    background: rgba(10,10,15,0.8);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    animation: slideDown 0.6s ease both;
+  }
+
+  @keyframes slideDown {
+    from { transform: translateY(-100%); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+  }
+
+  .logo-icon {
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+  }
+
+  .logo-text {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .logo-text span { color: var(--accent); }
+
+  nav ul {
+    display: flex;
+    list-style: none;
+    gap: 36px;
+    align-items: center;
+  }
+
+  nav ul a {
+    text-decoration: none;
+    color: var(--muted);
+    font-size: 14px;
+    font-weight: 500;
+    transition: color 0.2s;
+  }
+
+  nav ul a:hover { color: var(--text); }
+
+  .nav-actions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .btn-ghost {
+    padding: 9px 20px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+  }
+
+  .btn-ghost:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .btn-primary {
+    padding: 9px 20px;
+    border: none;
+    border-radius: 8px;
+    background: linear-gradient(135deg, var(--accent), #9b6dff);
+    color: #fff;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+    display: inline-block;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(124,92,252,0.4);
+  }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    position: relative;
+    padding: 120px 48px 80px;
+    overflow: hidden;
+  }
+
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 60% 40%, rgba(124,92,252,0.15) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 40% at 10% 80%, rgba(252,92,125,0.1) 0%, transparent 50%),
+      radial-gradient(ellipse 50% 50% at 90% 10%, rgba(92,244,196,0.08) 0%, transparent 50%);
+  }
+
+  /* Floating orbs */
+  .orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(60px);
+    animation: float 8s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  .orb1 {
+    width: 400px; height: 400px;
+    background: rgba(124,92,252,0.2);
+    top: 10%; right: 10%;
+    animation-delay: 0s;
+  }
+
+  .orb2 {
+    width: 250px; height: 250px;
+    background: rgba(252,92,125,0.15);
+    bottom: 20%; left: 5%;
+    animation-delay: -3s;
+  }
+
+  .orb3 {
+    width: 180px; height: 180px;
+    background: rgba(92,244,196,0.12);
+    top: 60%; right: 30%;
+    animation-delay: -5s;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-30px) scale(1.05); }
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 1;
+    max-width: 700px;
+    animation: fadeUp 0.8s ease 0.3s both;
+  }
+
+  @keyframes fadeUp {
+    from { transform: translateY(40px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    background: rgba(124,92,252,0.15);
+    border: 1px solid rgba(124,92,252,0.3);
+    border-radius: 100px;
+    font-size: 13px;
+    color: #b19dff;
+    margin-bottom: 28px;
+  }
+
+  .hero-badge .dot {
+    width: 6px; height: 6px;
+    background: var(--accent3);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+  }
+
+  .hero h1 {
+    font-size: clamp(42px, 6vw, 80px);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -2px;
+    margin-bottom: 24px;
+  }
+
+  .hero h1 .gradient-text {
+    background: linear-gradient(135deg, var(--accent), var(--accent2), var(--accent3));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero p {
+    font-size: 18px;
+    color: var(--muted);
+    line-height: 1.7;
+    max-width: 520px;
+    margin-bottom: 40px;
+  }
+
+  .hero-btns {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .btn-lg {
+    padding: 14px 32px;
+    font-size: 15px;
+    border-radius: 12px;
+  }
+
+  .btn-outline-lg {
+    padding: 13px 32px;
+    font-size: 15px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn-outline-lg:hover {
+    border-color: var(--accent3);
+    color: var(--accent3);
+  }
+
+  .hero-stats {
+    display: flex;
+    gap: 40px;
+    margin-top: 60px;
+    padding-top: 40px;
+    border-top: 1px solid var(--border);
+    animation: fadeUp 0.8s ease 0.6s both;
+  }
+
+  .stat-item { }
+
+  .stat-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 28px;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--accent), var(--accent3));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .stat-label {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  /* Floating hero cards */
+  .hero-cards {
+    position: absolute;
+    right: 48px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    animation: fadeUp 0.8s ease 0.5s both;
+  }
+
+  .hero-mini-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 16px 20px;
+    width: 280px;
+    backdrop-filter: blur(10px);
+    transition: transform 0.3s;
+  }
+
+  .hero-mini-card:hover { transform: translateX(-6px); }
+
+  .hero-mini-card:nth-child(2) { margin-left: 30px; }
+
+  .mc-top {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .mc-avatar {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+
+  .mc-name { font-weight: 600; font-size: 14px; }
+  .mc-role { font-size: 12px; color: var(--muted); }
+
+  .mc-match {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 600;
+    background: rgba(92,244,196,0.15);
+    color: var(--accent3);
+    border: 1px solid rgba(92,244,196,0.2);
+    margin-left: auto;
+  }
+
+  .mc-skills {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .skill-chip {
+    padding: 3px 10px;
+    border-radius: 100px;
+    font-size: 11px;
+    background: var(--surface2);
+    color: var(--muted);
+    border: 1px solid var(--border);
+  }
+
+  /* ── SECTION COMMONS ── */
+  section { padding: 100px 48px; }
+
+  .section-label {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 16px;
+  }
+
+  .section-title {
+    font-size: clamp(32px, 4vw, 52px);
+    font-weight: 800;
+    letter-spacing: -1.5px;
+    line-height: 1.1;
+    margin-bottom: 16px;
+  }
+
+  .section-sub {
+    font-size: 16px;
+    color: var(--muted);
+    max-width: 500px;
+    line-height: 1.7;
+    margin-bottom: 60px;
+  }
+
+  /* ── HOW IT WORKS ── */
+  .how-section { background: var(--surface); }
+
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    background: var(--border);
+    border-radius: 24px;
+    overflow: hidden;
+  }
+
+  .step {
+    background: var(--card);
+    padding: 48px 40px;
+    position: relative;
+    transition: background 0.3s;
+  }
+
+  .step:hover { background: var(--surface2); }
+
+  .step-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 72px;
+    font-weight: 800;
+    color: var(--border);
+    position: absolute;
+    top: 24px; right: 32px;
+    line-height: 1;
+  }
+
+  .step-icon {
+    width: 56px; height: 56px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    margin-bottom: 24px;
+  }
+
+  .step h3 {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    letter-spacing: -0.5px;
+  }
+
+  .step p {
+    font-size: 15px;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  /* ── FEATURES ── */
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+
+  .feature-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 36px;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .feature-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s;
+  }
+
+  .feature-card:hover::before { transform: scaleX(1); }
+
+  .feature-card:hover {
+    border-color: rgba(124,92,252,0.3);
+    transform: translateY(-4px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+  }
+
+  .feature-icon {
+    font-size: 32px;
+    margin-bottom: 20px;
+    display: block;
+  }
+
+  .feature-card h3 {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    letter-spacing: -0.5px;
+  }
+
+  .feature-card p {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  /* ── PROJECT CARDS ── */
+  .projects-section { background: var(--surface); }
+
+  .filter-bar {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 40px;
+    align-items: center;
+  }
+
+  .filter-label {
+    font-size: 13px;
+    color: var(--muted);
+    margin-right: 6px;
+  }
+
+  .filter-chip {
+    padding: 7px 16px;
+    border-radius: 100px;
+    font-size: 13px;
+    font-weight: 500;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .filter-chip:hover, .filter-chip.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+
+  .projects-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+
+  .project-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    overflow: hidden;
+    transition: all 0.3s;
+  }
+
+  .project-card:hover {
+    border-color: rgba(124,92,252,0.3);
+    transform: translateY(-6px);
+    box-shadow: 0 24px 48px rgba(0,0,0,0.3);
+  }
+
+  .project-header {
+    padding: 24px 24px 0;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+  }
+
+  .project-badge {
+    padding: 4px 12px;
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+
+  .badge-ai { background: rgba(124,92,252,0.2); color: #b19dff; }
+  .badge-web { background: rgba(92,244,196,0.15); color: var(--accent3); }
+  .badge-app { background: rgba(252,92,125,0.15); color: #ff8fa3; }
+  .badge-open { background: rgba(255,200,80,0.15); color: #ffd066; }
+
+  .project-bookmark {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    width: 32px; height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--muted);
+    transition: all 0.2s;
+  }
+
+  .project-bookmark:hover { border-color: var(--accent); color: var(--accent); }
+
+  .project-body { padding: 20px 24px; }
+
+  .project-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    letter-spacing: -0.5px;
+  }
+
+  .project-desc {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+    margin-bottom: 16px;
+  }
+
+  .stack-chips {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+
+  .stack-chip {
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    background: var(--surface2);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+
+  .project-meta {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 20px;
+  }
+
+  .meta-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .difficulty {
+    display: inline-flex;
+    gap: 3px;
+    align-items: center;
+  }
+
+  .diff-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+  }
+
+  .project-footer {
+    padding: 16px 24px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .project-author {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .author-avatar {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+  }
+
+  .author-info { }
+  .author-name { font-size: 13px; font-weight: 500; }
+  .author-college { font-size: 11px; color: var(--muted); }
+
+  .project-actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  .btn-join {
+    padding: 7px 18px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, var(--accent), #9b6dff);
+    border: none;
+    color: #fff;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-join:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 16px rgba(124,92,252,0.4);
+  }
+
+  /* ── PARTNERS SECTION ── */
+  .partners-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+  }
+
+  .partner-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 28px 20px;
+    text-align: center;
+    transition: all 0.3s;
+    position: relative;
+  }
+
+  .partner-card:hover {
+    border-color: rgba(124,92,252,0.4);
+    transform: translateY(-6px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+  }
+
+  .partner-avatar-wrap { position: relative; display: inline-block; margin-bottom: 16px; }
+
+  .partner-avatar {
+    width: 70px; height: 70px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    margin: 0 auto;
+  }
+
+  .status-dot {
+    position: absolute;
+    bottom: 3px; right: 3px;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    border: 2px solid var(--card);
+  }
+
+  .status-dot.online { background: var(--accent3); }
+  .status-dot.away { background: #ffd066; }
+
+  .partner-name {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .partner-title {
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+
+  .partner-college {
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+  }
+
+  .partner-match {
+    display: inline-block;
+    padding: 5px 14px;
+    border-radius: 100px;
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 14px;
+  }
+
+  .match-high {
+    background: rgba(92,244,196,0.15);
+    color: var(--accent3);
+    border: 1px solid rgba(92,244,196,0.25);
+  }
+
+  .match-mid {
+    background: rgba(124,92,252,0.15);
+    color: #b19dff;
+    border: 1px solid rgba(124,92,252,0.25);
+  }
+
+  .partner-skills {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 16px;
+  }
+
+  .partner-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+  }
+
+  .btn-sm {
+    padding: 7px 14px;
+    border-radius: 7px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.2s;
+  }
+
+  .btn-invite {
+    background: linear-gradient(135deg, var(--accent), #9b6dff);
+    border: none;
+    color: #fff;
+  }
+
+  .btn-invite:hover { box-shadow: 0 4px 12px rgba(124,92,252,0.4); }
+
+  .btn-save {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+
+  .btn-save:hover { color: var(--text); border-color: var(--text); }
+
+  /* ── COLLAB MODE TOGGLE ── */
+  .collab-section {
+    background: var(--surface);
+  }
+
+  .collab-inner {
+    background: linear-gradient(135deg, rgba(124,92,252,0.1), rgba(252,92,125,0.08));
+    border: 1px solid rgba(124,92,252,0.2);
+    border-radius: 24px;
+    padding: 60px;
+    text-align: center;
+  }
+
+  .toggle-wrap {
+    display: inline-flex;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 4px;
+    margin: 32px auto;
+  }
+
+  .toggle-option {
+    padding: 10px 28px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--muted);
+    background: transparent;
+    transition: all 0.3s;
+  }
+
+  .toggle-option.active {
+    background: linear-gradient(135deg, var(--accent), #9b6dff);
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(124,92,252,0.4);
+  }
+
+  .collab-desc {
+    font-size: 16px;
+    color: var(--muted);
+    max-width: 460px;
+    margin: 0 auto 32px;
+    line-height: 1.7;
+  }
+
+  /* ── READINESS SCORE ── */
+  .readiness-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 32px;
+  }
+
+  .readiness-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+  }
+
+  .readiness-title { font-size: 18px; font-weight: 700; }
+  .score-badge {
+    font-family: 'Syne', sans-serif;
+    font-size: 32px;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--accent3), #00d4aa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .progress-item {
+    margin-bottom: 16px;
+  }
+
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+
+  .progress-bar {
+    height: 6px;
+    background: var(--surface2);
+    border-radius: 100px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    border-radius: 100px;
+    background: linear-gradient(90deg, var(--accent), var(--accent3));
+    transition: width 1s ease;
+  }
+
+  /* ── CTA ── */
+  .cta-section {
+    padding: 100px 48px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cta-bg {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 80% at 50% 50%, rgba(124,92,252,0.2) 0%, transparent 70%);
+  }
+
+  .cta-section h2 {
+    font-size: clamp(36px, 5vw, 64px);
+    font-weight: 800;
+    letter-spacing: -2px;
+    position: relative;
+    z-index: 1;
+    margin-bottom: 16px;
+  }
+
+  .cta-section p {
+    font-size: 18px;
+    color: var(--muted);
+    margin-bottom: 40px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .cta-btns {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    padding: 60px 48px 40px;
+  }
+
+  .footer-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 48px;
+    margin-bottom: 48px;
+  }
+
+  .footer-brand p {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.7;
+    margin-top: 12px;
+    max-width: 260px;
+  }
+
+  .footer-col h4 {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+
+  .footer-col ul { list-style: none; }
+  .footer-col ul li { margin-bottom: 10px; }
+  .footer-col ul a {
+    text-decoration: none;
+    color: var(--muted);
+    font-size: 14px;
+    transition: color 0.2s;
+  }
+  .footer-col ul a:hover { color: var(--text); }
+
+  .footer-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 32px;
+    border-top: 1px solid var(--border);
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .social-links { display: flex; gap: 12px; }
+
+  .social-link {
+    width: 36px; height: 36px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    color: var(--muted);
+    font-size: 15px;
+    transition: all 0.2s;
+  }
+
+  .social-link:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  /* ── INTERESTS SECTION ── */
+  .interests-row {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 60px;
+  }
+
+  .interest-pill {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 20px;
+    border-radius: 100px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    cursor: pointer;
+    transition: all 0.3s;
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  .interest-pill:hover {
+    border-color: var(--accent);
+    background: rgba(124,92,252,0.1);
+    transform: translateY(-3px);
+  }
+
+  .interest-pill.selected {
+    border-color: var(--accent);
+    background: rgba(124,92,252,0.15);
+    color: #b19dff;
+  }
+
+  .interest-icon { font-size: 18px; }
+  .interest-count { font-size: 11px; color: var(--muted); }
+
+  /* ── NEARBY SUGGESTION ── */
+  .nearby-banner {
+    background: linear-gradient(135deg, rgba(92,244,196,0.08), rgba(124,92,252,0.08));
+    border: 1px solid rgba(92,244,196,0.2);
+    border-radius: 16px;
+    padding: 20px 28px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 40px;
+  }
+
+  .nearby-icon { font-size: 28px; }
+
+  .nearby-text h4 { font-size: 15px; font-weight: 600; margin-bottom: 3px; }
+  .nearby-text p { font-size: 13px; color: var(--muted); }
+
+  .nearby-btn {
+    margin-left: auto;
+    padding: 8px 20px;
+    border-radius: 8px;
+    border: 1px solid rgba(92,244,196,0.3);
+    background: transparent;
+    color: var(--accent3);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .nearby-btn:hover {
+    background: rgba(92,244,196,0.15);
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 1100px) {
+    .hero-cards { display: none; }
+    .partners-grid { grid-template-columns: repeat(2, 1fr); }
+    .footer-grid { grid-template-columns: 1fr 1fr; }
+  }
+
+  @media (max-width: 768px) {
+    nav { padding: 14px 20px; }
+    nav ul { display: none; }
+    section, .hero { padding: 80px 20px; }
+    .steps { grid-template-columns: 1fr; }
+    .features-grid { grid-template-columns: 1fr; }
+    .projects-grid { grid-template-columns: 1fr; }
+    .partners-grid { grid-template-columns: 1fr 1fr; }
+    .footer-grid { grid-template-columns: 1fr; }
+    .hero-stats { flex-wrap: wrap; gap: 24px; }
+    .collab-inner { padding: 40px 24px; }
+    .cta-section { padding: 80px 20px; }
+    footer { padding: 60px 20px 40px; }
+  }
+
+  /* ── ANIMATIONS ── */
+  .fade-in {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+
+  .fade-in.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Stagger children */
+  .stagger > * {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+
+  .stagger.visible > *:nth-child(1) { opacity: 1; transform: translateY(0); transition-delay: 0s; }
+  .stagger.visible > *:nth-child(2) { opacity: 1; transform: translateY(0); transition-delay: 0.1s; }
+  .stagger.visible > *:nth-child(3) { opacity: 1; transform: translateY(0); transition-delay: 0.2s; }
+  .stagger.visible > *:nth-child(4) { opacity: 1; transform: translateY(0); transition-delay: 0.3s; }
+  .stagger.visible > *:nth-child(5) { opacity: 1; transform: translateY(0); transition-delay: 0.4s; }
+  .stagger.visible > *:nth-child(6) { opacity: 1; transform: translateY(0); transition-delay: 0.5s; }
+
+  /* Smooth match percentage bar animation */
+  @keyframes grow {
+    from { width: 0; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="logo">
+    <div class="logo-icon">🔗</div>
+    <span class="logo-text">Partner<span>Forge</span></span>
+  </a>
+  <ul>
+    <li><a href="#how">How It Works</a></li>
+    <li><a href="#projects">Find Partners</a></li>
+    <li><a href="#post">Post Project</a></li>
+    <li><a href="#features">Features</a></li>
+  </ul>
+  <div class="nav-actions">
+    <a href="#" class="btn-ghost">Login</a>
+    <a href="#" class="btn-primary">Sign Up Free</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="home">
+  <div class="hero-bg"></div>
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+  <div class="orb orb3"></div>
+
+  <div class="hero-content">
+    <div class="hero-badge">
+      <span class="dot"></span>
+      Now with AI-powered skill matching
+    </div>
+    <h1>Find the Perfect<br><span class="gradient-text">Partner</span> for Your<br>Next Project</h1>
+    <p>Connect with students who share your vision. Match on skills, interests, and tech stacks — then build something amazing together.</p>
+    <div class="hero-btns">
+      <a href="#projects" class="btn-primary btn-lg">🔍 Find Partners</a>
+      <button class="btn-outline-lg" onclick="scrollToPost()">✦ Post a Project</button>
+    </div>
+    <div class="hero-stats">
+      <div class="stat-item">
+        <div class="stat-num">2,400+</div>
+        <div class="stat-label">Active Students</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">840+</div>
+        <div class="stat-label">Projects Posted</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">94%</div>
+        <div class="stat-label">Match Satisfaction</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating preview cards -->
+  <div class="hero-cards">
+    <div class="hero-mini-card">
+      <div class="mc-top">
+        <div class="mc-avatar" style="background: linear-gradient(135deg, #7c5cfc, #fc5c7d);">👩‍💻</div>
+        <div>
+          <div class="mc-name">Priya S.</div>
+          <div class="mc-role">ML Engineer</div>
+        </div>
+        <div class="mc-match">94% match</div>
+      </div>
+      <div class="mc-skills">
+        <span class="skill-chip">Python</span>
+        <span class="skill-chip">TensorFlow</span>
+        <span class="skill-chip">React</span>
+      </div>
+    </div>
+    <div class="hero-mini-card">
+      <div class="mc-top">
+        <div class="mc-avatar" style="background: linear-gradient(135deg, #5cf4c4, #3b82f6);">🧑‍🎨</div>
+        <div>
+          <div class="mc-name">Arjun M.</div>
+          <div class="mc-role">UI/UX Designer</div>
+        </div>
+        <div class="mc-match">88% match</div>
+      </div>
+      <div class="mc-skills">
+        <span class="skill-chip">Figma</span>
+        <span class="skill-chip">CSS</span>
+        <span class="skill-chip">Vue.js</span>
+      </div>
+    </div>
+    <div class="hero-mini-card">
+      <div class="mc-top">
+        <div class="mc-avatar" style="background: linear-gradient(135deg, #fc5c7d, #ffd066);">👨‍🔬</div>
+        <div>
+          <div class="mc-name">Lena K.</div>
+          <div class="mc-role">Backend Dev</div>
+        </div>
+        <div class="mc-match">81% match</div>
+      </div>
+      <div class="mc-skills">
+        <span class="skill-chip">Node.js</span>
+        <span class="skill-chip">MongoDB</span>
+        <span class="skill-chip">Docker</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how-section" id="how">
+  <div class="section-label">Process</div>
+  <h2 class="section-title">From idea to team in<br>three steps</h2>
+  <p class="section-sub fade-in">No awkward cold messages. Our smart system surfaces the right partners based on your actual skills and interests.</p>
+
+  <div class="steps stagger">
+    <div class="step">
+      <div class="step-num">01</div>
+      <div class="step-icon" style="background: rgba(124,92,252,0.15);">🧑‍💼</div>
+      <h3>Create Your Profile</h3>
+      <p>Add your skills, interests, experience level, and what you're hoping to build. Takes under 2 minutes and no CV required.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">02</div>
+      <div class="step-icon" style="background: rgba(92,244,196,0.12);">⚡</div>
+      <h3>Add Skills & Interests</h3>
+      <p>Tag yourself with tech stacks you love — React, Python, AI, UI/UX — and pick areas like Hackathons, Open Source, or Startups.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">03</div>
+      <div class="step-icon" style="background: rgba(252,92,125,0.12);">🚀</div>
+      <h3>Find & Connect</h3>
+      <p>Browse skill-matched partners, join open projects, or post your own idea. One click to invite, collaborate, or save for later.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="section-label">What You Get</div>
+  <h2 class="section-title">Built for real student<br>collaboration</h2>
+  <p class="section-sub">Every feature designed around how students actually work and connect.</p>
+
+  <div class="features-grid stagger">
+    <div class="feature-card">
+      <span class="feature-icon">🎯</span>
+      <h3>Skill Match Percentage</h3>
+      <p>Our algorithm compares your skills against potential partners and project needs, giving you a compatibility score so you know instantly who's a great fit.</p>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">💡</span>
+      <h3>Idea Pitch Cards</h3>
+      <p>Post your project as a structured pitch with title, description, tech stack, difficulty level, and how many teammates you need. Clear, scannable, and actionable.</p>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">🔄</span>
+      <h3>Collaboration Mode Toggle</h3>
+      <p>Switch between "Looking for Partners" (you have an idea) and "Ready to Join" (you want to contribute) modes. Your visibility adapts instantly.</p>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">🧩</span>
+      <h3>Interest-Based Discovery</h3>
+      <p>Browse by interest areas: Web Dev, AI/ML, App Dev, Open Source, and Hackathons. Find projects and people aligned with what excites you most.</p>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">📊</span>
+      <h3>Project Readiness Score</h3>
+      <p>A dynamic score based on your profile completeness, recent activity, and project details. Higher score = more visibility and better matches.</p>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">🌍</span>
+      <h3>Nearby Collaborators</h3>
+      <p>Optionally surface students from the same college or city for easier in-person collaboration. IRL teamwork, enabled digitally.</p>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">🔗</span>
+      <h3>Quick Connect Actions</h3>
+      <p>Invite, Collaborate, or Save partners with a single click. No friction, no lengthy forms — just direct action when inspiration strikes.</p>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">🏳️</span>
+      <h3>Beginner-Friendly</h3>
+      <p>Difficulty tags on every project (Beginner / Intermediate / Advanced) mean new coders find welcoming teams, not intimidating gatekeeping.</p>
+    </div>
+  </div>
+</section>
+
+<!-- INTEREST DISCOVERY + PROJECTS -->
+<section class="projects-section" id="projects">
+  <div class="section-label">Discover</div>
+  <h2 class="section-title">Browse open projects</h2>
+  <p class="section-sub">Real student ideas looking for collaborators right now. Filter by what you love.</p>
+
+  <!-- Nearby banner -->
+  <div class="nearby-banner fade-in">
+    <div class="nearby-icon">📍</div>
+    <div class="nearby-text">
+      <h4>12 students near you at UCLA are looking for partners</h4>
+      <p>Enable location to discover collaborators in your college or city</p>
+    </div>
+    <button class="nearby-btn">Enable Location →</button>
+  </div>
+
+  <!-- Interest pills -->
+  <div class="interests-row" id="interestRow">
+    <div class="interest-pill selected" onclick="toggleInterest(this)">
+      <span class="interest-icon">🌐</span>
+      Web Dev
+      <span class="interest-count">240 projects</span>
+    </div>
+    <div class="interest-pill" onclick="toggleInterest(this)">
+      <span class="interest-icon">🤖</span>
+      AI / ML
+      <span class="interest-count">188 projects</span>
+    </div>
+    <div class="interest-pill" onclick="toggleInterest(this)">
+      <span class="interest-icon">📱</span>
+      App Dev
+      <span class="interest-count">152 projects</span>
+    </div>
+    <div class="interest-pill" onclick="toggleInterest(this)">
+      <span class="interest-icon">🧑‍💻</span>
+      Open Source
+      <span class="interest-count">96 projects</span>
+    </div>
+    <div class="interest-pill" onclick="toggleInterest(this)">
+      <span class="interest-icon">⚡</span>
+      Hackathons
+      <span class="interest-count">74 projects</span>
+    </div>
+  </div>
+
+  <!-- Tech filter chips -->
+  <div class="filter-bar">
+    <span class="filter-label">Stack:</span>
+    <button class="filter-chip active" onclick="toggleFilter(this)">All</button>
+    <button class="filter-chip" onclick="toggleFilter(this)">React</button>
+    <button class="filter-chip" onclick="toggleFilter(this)">Python</button>
+    <button class="filter-chip" onclick="toggleFilter(this)">AI / LLM</button>
+    <button class="filter-chip" onclick="toggleFilter(this)">UI/UX</button>
+    <button class="filter-chip" onclick="toggleFilter(this)">Flutter</button>
+    <button class="filter-chip" onclick="toggleFilter(this)">Node.js</button>
+    <button class="filter-chip" onclick="toggleFilter(this)">Blockchain</button>
+  </div>
+
+  <div class="projects-grid stagger" id="projectsGrid">
+
+    <!-- Card 1 -->
+    <div class="project-card">
+      <div class="project-header">
+        <span class="project-badge badge-ai">AI / ML</span>
+        <button class="project-bookmark" onclick="this.textContent = this.textContent === '🔖' ? '🏷️' : '🔖'">🔖</button>
+      </div>
+      <div class="project-body">
+        <h3 class="project-title">StudyBuddy — AI Tutor for Any Subject</h3>
+        <p class="project-desc">An LLM-powered study companion that adapts to your learning style and generates personalized quizzes from your notes.</p>
+        <div class="stack-chips">
+          <span class="stack-chip">Python</span>
+          <span class="stack-chip">LangChain</span>
+          <span class="stack-chip">React</span>
+          <span class="stack-chip">FastAPI</span>
+        </div>
+        <div class="project-meta">
+          <span class="meta-item">
+            <span>⚡</span>
+            Difficulty:
+            <span class="difficulty">
+              <span class="diff-dot" style="background:#7c5cfc"></span>
+              <span class="diff-dot" style="background:#7c5cfc"></span>
+              <span class="diff-dot" style="background:var(--border)"></span>
+            </span>
+          </span>
+          <span class="meta-item">👥 2 / 4 members</span>
+          <span class="meta-item">⏱ 2 weeks</span>
+        </div>
+      </div>
+      <div class="project-footer">
+        <div class="project-author">
+          <div class="author-avatar" style="background: linear-gradient(135deg, #7c5cfc, #fc5c7d);">👩</div>
+          <div class="author-info">
+            <div class="author-name">Priya S.</div>
+            <div class="author-college">IIT Bombay</div>
+          </div>
+        </div>
+        <div class="project-actions">
+          <button class="btn-join" onclick="joinProject(this)">Join →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 2 -->
+    <div class="project-card">
+      <div class="project-header">
+        <span class="project-badge badge-web">Web Dev</span>
+        <button class="project-bookmark">🔖</button>
+      </div>
+      <div class="project-body">
+        <h3 class="project-title">Campus Eats — Student Food Delivery App</h3>
+        <p class="project-desc">A hyperlocal food ordering platform connecting campus canteens with students, featuring real-time order tracking and group orders.</p>
+        <div class="stack-chips">
+          <span class="stack-chip">Next.js</span>
+          <span class="stack-chip">Tailwind</span>
+          <span class="stack-chip">Supabase</span>
+          <span class="stack-chip">Stripe</span>
+        </div>
+        <div class="project-meta">
+          <span class="meta-item">
+            Difficulty:
+            <span class="difficulty">
+              <span class="diff-dot" style="background:#5cf4c4"></span>
+              <span class="diff-dot" style="background:var(--border)"></span>
+              <span class="diff-dot" style="background:var(--border)"></span>
+            </span>
+          </span>
+          <span class="meta-item">👥 1 / 3 members</span>
+          <span class="meta-item">⏱ 6 weeks</span>
+        </div>
+      </div>
+      <div class="project-footer">
+        <div class="project-author">
+          <div class="author-avatar" style="background: linear-gradient(135deg, #5cf4c4, #3b82f6);">🧑</div>
+          <div class="author-info">
+            <div class="author-name">Arjun M.</div>
+            <div class="author-college">UCLA</div>
+          </div>
+        </div>
+        <div class="project-actions">
+          <button class="btn-join" onclick="joinProject(this)">Join →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 3 -->
+    <div class="project-card">
+      <div class="project-header">
+        <span class="project-badge badge-app">App Dev</span>
+        <button class="project-bookmark">🔖</button>
+      </div>
+      <div class="project-body">
+        <h3 class="project-title">MindSpace — Mental Health Journaling App</h3>
+        <p class="project-desc">A private, AI-journaling app with mood tracking and therapist-reviewed prompts designed for stressed university students.</p>
+        <div class="stack-chips">
+          <span class="stack-chip">Flutter</span>
+          <span class="stack-chip">Firebase</span>
+          <span class="stack-chip">OpenAI API</span>
+        </div>
+        <div class="project-meta">
+          <span class="meta-item">
+            Difficulty:
+            <span class="difficulty">
+              <span class="diff-dot" style="background:#fc5c7d"></span>
+              <span class="diff-dot" style="background:#fc5c7d"></span>
+              <span class="diff-dot" style="background:#fc5c7d"></span>
+            </span>
+          </span>
+          <span class="meta-item">👥 3 / 5 members</span>
+          <span class="meta-item">⏱ 3 months</span>
+        </div>
+      </div>
+      <div class="project-footer">
+        <div class="project-author">
+          <div class="author-avatar" style="background: linear-gradient(135deg, #fc5c7d, #ffd066);">👩</div>
+          <div class="author-info">
+            <div class="author-name">Lena K.</div>
+            <div class="author-college">TU Berlin</div>
+          </div>
+        </div>
+        <div class="project-actions">
+          <button class="btn-join" onclick="joinProject(this)">Join →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 4 -->
+    <div class="project-card">
+      <div class="project-header">
+        <span class="project-badge badge-open">Open Source</span>
+        <button class="project-bookmark">🔖</button>
+      </div>
+      <div class="project-body">
+        <h3 class="project-title">CodeReview.ai — Automated PR Reviewer</h3>
+        <p class="project-desc">An open-source GitHub bot that uses LLMs to give detailed, contextual code reviews on pull requests — better than lint rules alone.</p>
+        <div class="stack-chips">
+          <span class="stack-chip">TypeScript</span>
+          <span class="stack-chip">GitHub API</span>
+          <span class="stack-chip">Claude API</span>
+        </div>
+        <div class="project-meta">
+          <span class="meta-item">
+            Difficulty:
+            <span class="difficulty">
+              <span class="diff-dot" style="background:#7c5cfc"></span>
+              <span class="diff-dot" style="background:#7c5cfc"></span>
+              <span class="diff-dot" style="background:var(--border)"></span>
+            </span>
+          </span>
+          <span class="meta-item">👥 2 / 4 members</span>
+          <span class="meta-item">⏱ Ongoing</span>
+        </div>
+      </div>
+      <div class="project-footer">
+        <div class="project-author">
+          <div class="author-avatar" style="background: linear-gradient(135deg, #ffd066, #fc5c7d);">🧑</div>
+          <div class="author-info">
+            <div class="author-name">Marcus T.</div>
+            <div class="author-college">MIT</div>
+          </div>
+        </div>
+        <div class="project-actions">
+          <button class="btn-join" onclick="joinProject(this)">Join →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 5 -->
+    <div class="project-card">
+      <div class="project-header">
+        <span class="project-badge badge-ai">AI / ML</span>
+        <button class="project-bookmark">🔖</button>
+      </div>
+      <div class="project-body">
+        <h3 class="project-title">SketchAI — Hand-drawn UI to Code</h3>
+        <p class="project-desc">Upload a whiteboard sketch of a UI and get production-ready React components back. Vision model + template system.</p>
+        <div class="stack-chips">
+          <span class="stack-chip">Python</span>
+          <span class="stack-chip">GPT-4V</span>
+          <span class="stack-chip">React</span>
+          <span class="stack-chip">FastAPI</span>
+        </div>
+        <div class="project-meta">
+          <span class="meta-item">
+            Difficulty:
+            <span class="difficulty">
+              <span class="diff-dot" style="background:#fc5c7d"></span>
+              <span class="diff-dot" style="background:#fc5c7d"></span>
+              <span class="diff-dot" style="background:#fc5c7d"></span>
+            </span>
+          </span>
+          <span class="meta-item">👥 1 / 3 members</span>
+          <span class="meta-item">⏱ 4 weeks</span>
+        </div>
+      </div>
+      <div class="project-footer">
+        <div class="project-author">
+          <div class="author-avatar" style="background: linear-gradient(135deg, #3b82f6, #5cf4c4);">👩</div>
+          <div class="author-info">
+            <div class="author-name">Yuna C.</div>
+            <div class="author-college">KAIST</div>
+          </div>
+        </div>
+        <div class="project-actions">
+          <button class="btn-join" onclick="joinProject(this)">Join →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 6 -->
+    <div class="project-card">
+      <div class="project-header">
+        <span class="project-badge badge-web">Web Dev</span>
+        <button class="project-bookmark">🔖</button>
+      </div>
+      <div class="project-body">
+        <h3 class="project-title">DevCollab — Real-time Code Editor</h3>
+        <p class="project-desc">A collaborative browser-based code editor with video chat, inspired by Replit. Built for student pair programming sessions.</p>
+        <div class="stack-chips">
+          <span class="stack-chip">WebSockets</span>
+          <span class="stack-chip">Monaco</span>
+          <span class="stack-chip">WebRTC</span>
+          <span class="stack-chip">Redis</span>
+        </div>
+        <div class="project-meta">
+          <span class="meta-item">
+            Difficulty:
+            <span class="difficulty">
+              <span class="diff-dot" style="background:#7c5cfc"></span>
+              <span class="diff-dot" style="background:#7c5cfc"></span>
+              <span class="diff-dot" style="background:#7c5cfc"></span>
+            </span>
+          </span>
+          <span class="meta-item">👥 2 / 4 members</span>
+          <span class="meta-item">⏱ 8 weeks</span>
+        </div>
+      </div>
+      <div class="project-footer">
+        <div class="project-author">
+          <div class="author-avatar" style="background: linear-gradient(135deg, #7c5cfc, #3b82f6);">🧑</div>
+          <div class="author-info">
+            <div class="author-name">Rohan P.</div>
+            <div class="author-college">NUS</div>
+          </div>
+        </div>
+        <div class="project-actions">
+          <button class="btn-join" onclick="joinProject(this)">Join →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FIND PARTNERS / USER CARDS -->
+<section id="partners">
+  <div class="section-label">People</div>
+  <h2 class="section-title">Top matches for you</h2>
+  <p class="section-sub">Students with complementary skills who are actively looking to collaborate.</p>
+
+  <div class="partners-grid stagger">
+    <div class="partner-card">
+      <div class="partner-avatar-wrap">
+        <div class="partner-avatar" style="background: linear-gradient(135deg, #7c5cfc, #fc5c7d);">👩‍💻</div>
+        <div class="status-dot online"></div>
+      </div>
+      <div class="partner-name">Priya Sharma</div>
+      <div class="partner-title">ML Engineer · 3rd Year</div>
+      <div class="partner-college">🏛 IIT Bombay · Mumbai</div>
+      <div class="partner-match match-high">94% Match</div>
+      <div class="partner-skills">
+        <span class="skill-chip">Python</span>
+        <span class="skill-chip">TensorFlow</span>
+        <span class="skill-chip">React</span>
+        <span class="skill-chip">LLMs</span>
+      </div>
+      <div style="font-size:12px; color: var(--muted); margin-bottom: 16px; font-style: italic;">"Looking to build AI tools that actually help people"</div>
+      <div class="partner-actions">
+        <button class="btn-sm btn-invite">✉ Invite</button>
+        <button class="btn-sm btn-save">🔖 Save</button>
+      </div>
+    </div>
+
+    <div class="partner-card">
+      <div class="partner-avatar-wrap">
+        <div class="partner-avatar" style="background: linear-gradient(135deg, #5cf4c4, #3b82f6);">🧑‍🎨</div>
+        <div class="status-dot online"></div>
+      </div>
+      <div class="partner-name">Arjun Mehta</div>
+      <div class="partner-title">UI/UX Designer · 2nd Year</div>
+      <div class="partner-college">🏛 UCLA · Los Angeles</div>
+      <div class="partner-match match-high">88% Match</div>
+      <div class="partner-skills">
+        <span class="skill-chip">Figma</span>
+        <span class="skill-chip">CSS</span>
+        <span class="skill-chip">Vue.js</span>
+      </div>
+      <div style="font-size:12px; color: var(--muted); margin-bottom: 16px; font-style: italic;">"Design is everything. Let's make something beautiful"</div>
+      <div class="partner-actions">
+        <button class="btn-sm btn-invite">✉ Invite</button>
+        <button class="btn-sm btn-save">🔖 Save</button>
+      </div>
+    </div>
+
+    <div class="partner-card">
+      <div class="partner-avatar-wrap">
+        <div class="partner-avatar" style="background: linear-gradient(135deg, #fc5c7d, #ffd066);">👩‍🔬</div>
+        <div class="status-dot away"></div>
+      </div>
+      <div class="partner-name">Lena Kovalenko</div>
+      <div class="partner-title">Backend Dev · 4th Year</div>
+      <div class="partner-college">🏛 TU Berlin · Berlin</div>
+      <div class="partner-match match-mid">81% Match</div>
+      <div class="partner-skills">
+        <span class="skill-chip">Node.js</span>
+        <span class="skill-chip">MongoDB</span>
+        <span class="skill-chip">Docker</span>
+      </div>
+      <div style="font-size:12px; color: var(--muted); margin-bottom: 16px; font-style: italic;">"Open source enthusiast. Love scalable systems"</div>
+      <div class="partner-actions">
+        <button class="btn-sm btn-invite">✉ Invite</button>
+        <button class="btn-sm btn-save">🔖 Save</button>
+      </div>
+    </div>
+
+    <div class="partner-card">
+      <div class="partner-avatar-wrap">
+        <div class="partner-avatar" style="background: linear-gradient(135deg, #ffd066, #fc5c7d);">🧑‍💼</div>
+        <div class="status-dot online"></div>
+      </div>
+      <div class="partner-name">Marcus Thompson</div>
+      <div class="partner-title">Full Stack · 3rd Year</div>
+      <div class="partner-college">🏛 MIT · Cambridge</div>
+      <div class="partner-match match-mid">76% Match</div>
+      <div class="partner-skills">
+        <span class="skill-chip">TypeScript</span>
+        <span class="skill-chip">GraphQL</span>
+        <span class="skill-chip">Go</span>
+      </div>
+      <div style="font-size:12px; color: var(--muted); margin-bottom: 16px; font-style: italic;">"Hackathon veteran. 5x winner at collegiate events"</div>
+      <div class="partner-actions">
+        <button class="btn-sm btn-invite">✉ Invite</button>
+        <button class="btn-sm btn-save">🔖 Save</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- COLLABORATION MODE + READINESS -->
+<section class="collab-section" id="post">
+  <div class="fade-in">
+  <div class="collab-inner">
+    <div class="section-label" style="text-align:center">Your Mode</div>
+    <h2 class="section-title" style="text-align:center">How do you want to collaborate?</h2>
+
+    <div class="toggle-wrap">
+      <button class="toggle-option active" id="toggleLooking" onclick="switchMode('looking')">🔍 Looking for Partners</button>
+      <button class="toggle-option" id="toggleReady" onclick="switchMode('ready')">🚀 Ready to Join Projects</button>
+    </div>
+
+    <p class="collab-desc" id="collabDesc">You have a project idea and you're looking for talented teammates to bring it to life. You'll appear in partner discovery feeds.</p>
+
+    <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 40px;">
+      <a href="#" class="btn-primary btn-lg">Post Your Project</a>
+      <button class="btn-outline-lg" style="border-color: var(--border)">View Your Profile</button>
+    </div>
+
+    <!-- Readiness Score Widget -->
+    <div style="max-width: 480px; margin: 0 auto;">
+      <div class="readiness-card">
+        <div class="readiness-header">
+          <span class="readiness-title">Profile Readiness Score</span>
+          <span class="score-badge">72%</span>
+        </div>
+        <div class="progress-item">
+          <div class="progress-label"><span>Profile Info</span><span>100%</span></div>
+          <div class="progress-bar"><div class="progress-fill" style="width: 100%"></div></div>
+        </div>
+        <div class="progress-item">
+          <div class="progress-label"><span>Skills Added</span><span>80%</span></div>
+          <div class="progress-bar"><div class="progress-fill" style="width: 80%"></div></div>
+        </div>
+        <div class="progress-item">
+          <div class="progress-label"><span>Project Posted</span><span>60%</span></div>
+          <div class="progress-bar"><div class="progress-fill" style="width: 60%; background: linear-gradient(90deg, var(--accent2), #ffd066)"></div></div>
+        </div>
+        <div class="progress-item">
+          <div class="progress-label"><span>Intro Video</span><span>0%</span></div>
+          <div class="progress-bar"><div class="progress-fill" style="width: 0%; background: linear-gradient(90deg, #ffd066, var(--accent3))"></div></div>
+        </div>
+        <p style="font-size: 12px; color: var(--muted); margin-top: 16px; text-align: center;">Add an intro video to boost your score to 100% and get 3× more profile views</p>
+      </div>
+    </div>
+  </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="cta-bg"></div>
+  <h2>Ready to build something<br><span style="background: linear-gradient(135deg, var(--accent), var(--accent2), var(--accent3)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">incredible?</span></h2>
+  <p>Join 2,400+ students already collaborating on PartnerForge</p>
+  <div class="cta-btns">
+    <a href="#" class="btn-primary btn-lg">Create Free Account</a>
+    <button class="btn-outline-lg">Explore Projects</button>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <a href="#" class="logo" style="margin-bottom: 12px; display: inline-flex;">
+        <div class="logo-icon">🔗</div>
+        <span class="logo-text">Partner<span>Forge</span></span>
+      </a>
+      <p>The student project collaboration platform. Find partners, build things, grow your skills — together.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Platform</h4>
+      <ul>
+        <li><a href="#">Find Partners</a></li>
+        <li><a href="#">Post Project</a></li>
+        <li><a href="#">Browse Projects</a></li>
+        <li><a href="#">Leaderboard</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Company</h4>
+      <ul>
+        <li><a href="#">About Us</a></li>
+        <li><a href="#">Blog</a></li>
+        <li><a href="#">Contact</a></li>
+        <li><a href="#">Privacy</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Community</h4>
+      <ul>
+        <li><a href="#">Discord</a></li>
+        <li><a href="#">GitHub</a></li>
+        <li><a href="#">LinkedIn</a></li>
+        <li><a href="#">Newsletter</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="footer-bottom">
+    <span>© 2025 PartnerForge. Made for students, by students.</span>
+    <div class="social-links">
+      <a href="#" class="social-link" title="GitHub">⌥</a>
+      <a href="#" class="social-link" title="LinkedIn">in</a>
+      <a href="#" class="social-link" title="Twitter">𝕏</a>
+      <a href="#" class="social-link" title="Discord">◈</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // ── SCROLL ANIMATIONS ──
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.fade-in, .stagger').forEach(el => observer.observe(el));
+
+  // ── FILTER CHIPS ──
+  function toggleFilter(el) {
+    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+  }
+
+  // ── INTEREST PILLS ──
+  function toggleInterest(el) {
+    el.classList.toggle('selected');
+  }
+
+  // ── COLLAB MODE TOGGLE ──
+  const modeDescriptions = {
+    looking: "You have a project idea and you're looking for talented teammates to bring it to life. You'll appear in partner discovery feeds.",
+    ready: "You're open to joining existing projects. Ideal if you want to contribute skills without committing to a full idea from scratch."
+  };
+
+  function switchMode(mode) {
+    const desc = document.getElementById('collabDesc');
+    const lookingBtn = document.getElementById('toggleLooking');
+    const readyBtn = document.getElementById('toggleReady');
+
+    if (mode === 'looking') {
+      lookingBtn.classList.add('active');
+      readyBtn.classList.remove('active');
+    } else {
+      readyBtn.classList.add('active');
+      lookingBtn.classList.remove('active');
+    }
+
+    desc.style.opacity = '0';
+    setTimeout(() => {
+      desc.textContent = modeDescriptions[mode];
+      desc.style.opacity = '1';
+      desc.style.transition = 'opacity 0.4s';
+    }, 200);
+  }
+
+  // ── JOIN PROJECT ──
+  function joinProject(btn) {
+    const originalText = btn.textContent;
+    btn.textContent = '✓ Joined!';
+    btn.style.background = 'linear-gradient(135deg, #5cf4c4, #00d4aa)';
+    btn.disabled = true;
+    setTimeout(() => {
+      btn.textContent = originalText;
+      btn.style.background = '';
+      btn.disabled = false;
+    }, 2500);
+  }
+
+  function scrollToPost() {
+    document.getElementById('post').scrollIntoView({ behavior: 'smooth' });
+  }
+
+  // ── NAV ACTIVE ──
+  window.addEventListener('scroll', () => {
+    const nav = document.querySelector('nav');
+    if (window.scrollY > 50) {
+      nav.style.background = 'rgba(10,10,15,0.95)';
+    } else {
+      nav.style.background = 'rgba(10,10,15,0.8)';
+    }
+  });
+
+  // ── ANIMATE PROGRESS BARS ON SCROLL ──
+  const progressObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.querySelectorAll('.progress-fill').forEach(bar => {
+          const width = bar.style.width;
+          bar.style.width = '0';
+          requestAnimationFrame(() => {
+            setTimeout(() => {
+              bar.style.transition = 'width 1.2s ease';
+              bar.style.width = width;
+            }, 200);
+          });
+        });
+      }
+    });
+  }, { threshold: 0.3 });
+
+  document.querySelectorAll('.readiness-card').forEach(card => progressObserver.observe(card));
+</script>
+</body>
+</html>
